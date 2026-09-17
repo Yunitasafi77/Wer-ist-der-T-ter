@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wer ist der Täter? - Digital Mystery Game</title>
+
+    <!-- Google Fonts & Tone.js Audio Library -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #0b1120;
+            --panel-bg: rgba(30, 41, 59, 0.85);
+            --card-inner: #1e293b;
+            --border-color: #334155;
+            --amber-accent: #f59e0b;
+            --amber-hover: #d97706;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --emerald-green: #10b981;
+            --rose-red: #ef4444;
+            --cyan-accent: #38bdf8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER & NAVIGATION */
+        header {
+            background: rgba(15, 23, 42, 0.95);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            padding: 0.75rem 1rem;
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .brand-box {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--amber-hover), var(--amber-accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: #0b1120;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+
+        .brand-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .brand-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .badge-ict {
+            font-size: 0.65rem;
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--amber-accent);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            padding: 0.15rem 0.5rem;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+
+        .header-stats {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stat-pill {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid var(--border-color);
+            padding: 0.4rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-weight: 600;
+        }
+
+        .btn {
+            border: none;
+            cursor: pointer;
+            border-radius: 10px;
+            padding: 0.5rem 0.85rem;
+            font-weight: 700;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            color: #ffffff;
+            background: var(--card-inner);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn:hover {
+            border-color: var(--amber-accent);
+            transform: translateY(-1px);
+        }
+
+        .btn-amber {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #090d16;
+            border: none;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+        }
+
+        .btn-amber:hover {
+            filter: brightness(1.1);
+            color: #000;
+        }
+
+        .btn-vocab {
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--amber-accent);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        /* LAYOUT & VIEWS CONTAINER */
+        .main-wrapper {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1.25rem 1rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* VIEW: HOME MENU */
+        .home-view {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            flex: 1;
+            padding: 2rem 1rem;
+            gap: 2rem;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 1rem;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 30px;
+            color: var(--amber-accent);
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .hero-title {
+            font-size: 2.75rem;
+            font-weight: 800;
+            line-height: 1.2;
+            background: linear-gradient(135deg, #ffffff 40%, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            max-width: 620px;
+            font-size: 1rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .feature-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+            width: 100%;
+            max-width: 850px;
+            margin-top: 1rem;
+        }
+
+        .feature-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            padding: 1.25rem;
+            border-radius: 16px;
+            text-align: left;
+        }
+
+        /* VIEW: CASE SELECTION */
+        .case-select-view {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .case-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .case-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            transition: all 0.25 ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .case-card:hover {
+            border-color: var(--amber-accent);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .case-number {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--amber-accent);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .case-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+
+        .case-desc {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            flex: 1;
+        }
+
+        .case-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: #cbd5e1;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding-top: 0.75rem;
+        }
+
+        .tag-level {
+            padding: 0.15rem 0.5rem;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.65rem;
+        }
+
+        .level-a1 { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .level-a2 { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+        .level-b1 { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+
+        /* VIEW: GAME PLAYAWAY (EXISTING MAIN LAYOUT) */
+        .game-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
+            flex: 1;
+        }
+
+        @media (min-width: 900px) {
+            .game-layout {
+                grid-template-columns: 320px 1fr;
+            }
+        }
+
+        /* GLASS PANELS */
+        .glass-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 0.5rem;
+        }
+
+        .panel-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .suspect-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .suspect-card {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.75rem 0.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .suspect-card:hover {
+            border-color: var(--amber-accent);
+            background: rgba(245, 158, 11, 0.05);
+        }
+
+        .suspect-avatar {
+            font-size: 2rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .suspect-name {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #f8fafc;
+        }
+
+        .suspect-loc {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            margin-top: 0.15rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .suspect-status {
+            margin-top: 0.4rem;
+            font-size: 0.6rem;
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            border-radius: 4px;
+            font-weight: 700;
+            padding: 0.1rem;
+        }
+
+        /* NOTEBOOK & CLUES LIST */
+        .notebook-box {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 0.75rem;
+            min-height: 180px;
+            max-height: 250px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .clue-card {
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 8px;
+            padding: 0.65rem;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            color: #e2e8f0;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .clue-title {
+            color: var(--amber-accent);
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        /* GAME WINDOW / MAIN VIEW */
+        .game-window {
+            min-height: 460px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* STATEMENT BOX */
+        .statement-box {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .statement-avatar {
+            font-size: 2.5rem;
+            background: var(--card-inner);
+            padding: 0.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .statement-text {
+            font-size: 0.95rem;
+            font-style: italic;
+            color: #e2e8f0;
+            line-height: 1.5;
+            margin-top: 0.25rem;
+        }
+
+        /* OPTIONS BUTTONS */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+
+        @media (min-width: 600px) {
+            .options-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .option-btn {
+            background: #1e293b;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.85rem;
+            border-radius: 12px;
+            text-align: left;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--amber-accent);
+            background: #334155;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-backdrop.hidden {
+            display: none !important;
+        }
+
+        .modal-content {
+            background: #0f172a;
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            border-radius: 20px;
+            max-width: 500px;
+            width: 100%;
+            padding: 1.5rem;
+            box-shadow: 0 20px 30px rgba(0, 0, 0, 0.6);
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.25rem;
+            cursor: pointer;
+        }
+
+        .vocab-list {
+            margin-top: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding-right: 0.25rem;
+        }
+
+        .vocab-item {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid var(--border-color);
+            padding: 0.65rem 0.85rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+        }
+
+        .vocab-de {
+            color: var(--amber-accent);
+            font-weight: 700;
+            font-family: monospace;
+        }
+
+        .vocab-id {
+            color: #cbd5e1;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        .pulse-btn {
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(245, 158, 11, 0.3); }
+            50% { box-shadow: 0 0 22px rgba(245, 158, 11, 0.7); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOP NAVIGATION BAR -->
+    <header>
+        <div class="header-container">
+            <div class="brand-box" onclick="switchView('home')">
+                <div class="brand-icon">🔍</div>
+                <div>
+                    <div class="brand-title">
+                        WER IST DER TÄTER?
+                        <span class="badge-ict">ICT Mystery</span>
+                    </div>
+                    <div class="brand-subtitle" id="activeCaseHeaderSubtitle">Deutsch Lernen durch Detektivarbeit</div>
+                </div>
+            </div>
+
+            <div class="header-stats">
+                <button id="navBackBtn" onclick="switchView('case_select')" class="btn hidden">
+                    ← Kasus-Menü
+                </button>
+
+                <div class="stat-pill" id="clueStatPill" style="display: none;">
+                    <span>📋 Hinweise:</span>
+                    <strong id="clueCount" style="color: var(--amber-accent);">0 / 4</strong>
+                </div>
+
+                <div class="stat-pill">
+                    <span>⭐</span>
+                    <strong id="scoreText">0 Pkt</strong>
+                </div>
+
+                <button id="soundToggle" onclick="toggleSound()" class="btn" title="Sound Toggle">
+                    <span id="soundIcon">🔊</span>
+                </button>
+
+                <button onclick="toggleVocabModal()" class="btn btn-vocab">
+                    📖 Wortschatz
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="main-wrapper">
+
+        <!-- VIEW 1: HOME SCREEN -->
+        <section id="viewHome" class="home-view">
+            <div style="font-size: 3.5rem; filter: drop-shadow(0 10px 20px rgba(245, 158, 11, 0.4));">🔍🕵️‍♂️</div>
+            
+            <div>
+                <span class="hero-badge">🎓 Interaktives Deutsch-Lernspiel</span>
+                <h1 class="hero-title" style="margin-top: 0.75rem;">Wer ist der Täter?</h1>
+                <p class="hero-subtitle" style="margin-top: 0.5rem;">
+                    Asah kemampuan membaca Bahasa Jerman (Leseverstehen) & penalaran logismu! Pilihlah kasus detektif interaktif, analisis alibi para tersangka, dan temukan pelakunya!
+                </p>
+            </div>
+
+            <button onclick="switchView('case_select')" class="btn btn-amber pulse-btn" style="padding: 1rem 2.5rem; font-size: 1.1rem; border-radius: 14px;">
+                <span>🚀 JETZT STARTEN (MULAI DETEKTIF)</span>
+            </button>
+
+            <div class="feature-cards">
+                <div class="feature-card">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.4rem;">📖</div>
+                    <h4 style="font-size: 0.95rem; color: var(--amber-accent); font-weight: 700;">Leseverstehen A1-B1</h4>
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">Latihan membaca percakapan & alibi nyata Bahasa Jerman.</p>
+                </div>
+                <div class="feature-card">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.4rem;">💡</div>
+                    <h4 style="font-size: 0.95rem; color: var(--amber-accent); font-weight: 700;">10 Thema-Kasus</h4>
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">Berbagai pilihan topik: Kampus, Teknologi ICT, Seni, Laboratorium & Media.</p>
+                </div>
+                <div class="feature-card">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.4rem;">🎯</div>
+                    <h4 style="font-size: 0.95rem; color: var(--amber-accent); font-weight: 700;">Wortschatz Helfer</h4>
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">Kamus kosakata bawaan terintegrasi untuk membantu investigasi.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 2: CASE SELECTION (10 THEMES) -->
+        <section id="viewCaseSelect" class="case-select-view hidden">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h2 style="font-size: 1.6rem; font-weight: 800; color: #f8fafc;">Wähle einen Fall (Pilih Tema Kasus)</h2>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">Terdapat 10 kasus misteri yang bisa kamu selesaikan.</p>
+                </div>
+
+                <button onclick="switchView('home')" class="btn">
+                    ← Home Menu
+                </button>
+            </div>
+
+            <div class="case-grid" id="caseGrid">
+                <!-- 10 Case Cards dynamically populated by JS -->
+            </div>
+        </section>
+
+        <!-- VIEW 3: GAMEPLAY VIEW -->
+        <section id="viewGameplay" class="game-layout hidden">
+            <!-- LEFT SIDEBAR -->
+            <aside style="display: flex; flex-direction: column; gap: 1.25rem;">
+                
+                <!-- Suspects Panel -->
+                <div class="glass-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">🕵️ Verdächtige (4)</div>
+                        <span style="font-size: 0.65rem; color: var(--text-muted); font-family: monospace;" id="sidebarLocationTag">CAMPUS</span>
+                    </div>
+
+                    <div class="suspect-grid" id="suspectGrid">
+                        <!-- Cards added via JS -->
+                    </div>
+                </div>
+
+                <!-- Clue Notebook -->
+                <div class="glass-panel" style="flex: 1;">
+                    <div class="panel-header">
+                        <div class="panel-title">📔 Ermittlungs-Notizbuch</div>
+                        <span style="font-size: 0.65rem; color: var(--text-muted);">Clues</span>
+                    </div>
+                    <p style="font-size: 0.7rem; color: var(--text-muted);">Gesammelte Hinweise erscheinen hier:</p>
+
+                    <div id="notebookContent" class="notebook-box">
+                        <div style="text-align: center; padding: 1.5rem 0; color: var(--text-muted);">
+                            <div style="font-size: 1.5rem; opacity: 0.5; margin-bottom: 0.4rem;">🔍</div>
+                            <p style="font-size: 0.75rem;">Noch keine Hinweise.</p>
+                            <p style="font-size: 0.65rem; opacity: 0.7;">Beantworte die Fragen!</p>
+                        </div>
+                    </div>
+
+                    <!-- Final Accusation Button -->
+                    <button id="solveCaseBtn" onclick="renderAccusationPhase()" disabled class="btn" style="width: 100%; padding: 0.8rem; background: #1e293b; color: #64748b; cursor: not-allowed; margin-top: 0.5rem;">
+                        ⚖️ WER IST DER TÄTER?
+                    </button>
+                </div>
+            </aside>
+
+            <!-- RIGHT MAIN VIEW -->
+            <div id="gameWindow" class="glass-panel game-window">
+                <!-- Dynamic Content injected here -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- WORTSCHATZ HELPER MODAL -->
+    <div id="vocabModal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <button onclick="toggleVocabModal()" class="close-modal">✕</button>
+            
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(245,158,11,0.2); display: flex; align-items: center; justify-content: center; color: var(--amber-accent); font-size: 1.2rem;">
+                    🌐
+                </div>
+                <div>
+                    <h3 style="font-size: 1rem; color: #f8fafc; font-weight: 700;" id="vocabModalTitle">Wortschatz-Helfer (Kamus Kosakata)</h3>
+                    <p style="font-size: 0.7rem; color: var(--text-muted);" id="vocabModalSub">Kosakata Bahasa Jerman untuk penyelidikan</p>
+                </div>
+            </div>
+
+            <div class="vocab-list" id="vocabModalList">
+                <!-- Dynamically filled by JS -->
+            </div>
+
+            <button onclick="toggleVocabModal()" class="btn btn-amber" style="width: 100%; margin-top: 1.25rem; padding: 0.75rem;">
+                Verstanden! (Mengerti)
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- GAME STATE ---
+        const gameState = {
+            currentView: 'home', // 'home', 'case_select', 'gameplay'
+            activeCaseId: null,
+            currentStep: 0, // 0: Intro, 1-4: Suspect Investigation, 5: Accusation
+            score: 0,
+            soundEnabled: true,
+            solvedSuspects: [],
+            unlockedClues: [],
+            selectedAccusation: null
+        };
+
+        // --- GENERAL FALLBACK VOCABULARY ---
+        const generalVocabList = [
+            { de: 'der Täter', id: 'Pelaku / Tersangka utama' },
+            { de: 'das Alibi', id: 'Bukti keberadaan saat kejadian' },
+            { de: 'verdächtig', id: 'Mencurigakan' },
+            { de: 'die Zeugenaussage', id: 'Keterangan / Kesaksian saksi' },
+            { de: 'lügen (hat gelogen)', id: 'Berbohong' },
+            { de: 'bestätigen', id: 'Mengonfirmasi / Membenarkan' },
+            { de: 'der Diebstahl', id: 'Pencurian' }
+        ];
+
+        // --- 10 CASES DATABASE ---
+        const casesDatabase = [
+            {
+                id: 'case1',
+                number: 'Fall #1',
+                title: 'Das verschwundene Handy',
+                location: 'UNIVERSITÄT CAMPUS',
+                level: 'Niveau A1/A2',
+                levelTag: 'level-a1',
+                desc: 'Smartphone milik Prof. Schneider mendadak hilang di kampus pada pukul 10:00 Uhr pagi! Siapa pelakunya?',
+                vocabList: [
+                    { de: 'das verschwundene Handy', id: 'Ponsel / HP yang hilang' },
+                    { de: 'die Bibliothek', id: 'Perpustakaan' },
+                    { de: 'die Mensa', id: 'Kantin kampus' },
+                    { de: 'das Sprachlabor', id: 'Laboratorium bahasa' },
+                    { de: 'die Sporthalle', id: 'Gedung / Aula olahraga' },
+                    { de: 'geschlossen', id: 'Tutup' },
+                    { de: 'geöffnet', id: 'Buka' },
+                    { de: 'die Uhrzeit (um 10:00 Uhr)', id: 'Waktu / Jam (pada pukul 10:00)' }
+                ],
+                suspects: [
+                    {
+                        id: 'anna',
+                        name: 'Anna',
+                        avatar: '👩‍⚕️',
+                        major: 'Medizin',
+                        location: 'Bibliothek',
+                        time: '10:00 Uhr',
+                        statement: 'Anna war um 10:00 Uhr in der Bibliothek. Sie sagt: "Ich war von 09:30 bis 11:00 Uhr in der Bibliothek und habe ein Buch gelesen."',
+                        question: 'Wo war Anna laut ihrer Aussage um 10:00 Uhr?',
+                        options: [
+                            { text: 'In der Mensa', correct: false },
+                            { text: 'In der Bibliothek', correct: true },
+                            { text: 'Im Café', correct: false }
+                        ],
+                        explanation: 'Richtig! Anna war laut ihrer Aussage in der Bibliothek.',
+                        clueText: '🔍 Bibliothekar-Aussage: Der Bibliothekar bestätigt, dass Anna wirklich von 09:30 bis 11:00 Uhr ruhig gelernt hat. (Alibi!)',
+                        innocent: true
+                    },
+                    {
+                        id: 'lukas',
+                        name: 'Lukas',
+                        avatar: '👨‍💻',
+                        major: 'Informatik',
+                        location: 'Mensa',
+                        time: '10:00 Uhr',
+                        statement: 'Lukas sagt: "Ich war genau um 10:00 Uhr in der Mensa und habe eine warme Pizza gegessen. Es war sehr lecker!"',
+                        question: 'Was hat Lukas um 10:00 Uhr in der Mensa angeblich gemacht?',
+                        options: [
+                            { text: 'Basketball gespielt', correct: false },
+                            { text: 'Ein Buch gelesen', correct: false },
+                            { text: 'Pizza gegessen', correct: true }
+                        ],
+                        explanation: 'Richtig! Lukas behauptet, Pizza in der Mensa gegessen zu haben.',
+                        clueText: '🚨 WICHTIGER HINWEIS: Der Mensa-Koch sagt: "Die Mensa öffnet erst um 11:30 Uhr! Um 10:00 Uhr war die Mensa GESCHLOSSEN!" (GELOGEN!)',
+                        innocent: false
+                    },
+                    {
+                        id: 'mia',
+                        name: 'Mia',
+                        avatar: '👩‍🎨',
+                        major: 'Kunst',
+                        location: 'Sprachlabor',
+                        time: '10:00 Uhr',
+                        statement: 'Mia sagt: "Ich hatte von 09:45 bis 10:45 Uhr Unterricht im Sprachlabor. Ich habe Deutsch gelernt."',
+                        question: 'Welches Fach hat Mia um 10:00 Uhr gelernt?',
+                        options: [
+                            { text: 'Deutsch', correct: true },
+                            { text: 'Englisch', correct: false },
+                            { text: 'Mathematik', correct: false }
+                        ],
+                        explanation: 'Richtig! Mia war im Sprachlabor und hat Deutsch gelernt.',
+                        clueText: '🔍 Lehrerin-Aussage: Die Deutschlehrerin bestätigt, dass Mia die ganze Zeit anwesend war. (Alibi!)',
+                        innocent: true
+                    },
+                    {
+                        id: 'tom',
+                        name: 'Tom',
+                        avatar: '👨‍🏈',
+                        major: 'Sport',
+                        location: 'Sporthalle',
+                        time: '10:00 Uhr',
+                        statement: 'Tom sagt: "Ich war von 09:00 bis 10:30 Uhr in der Sporthalle und habe Basketball trainiert."',
+                        question: 'Wie lange war Tom in der Sporthalle?',
+                        options: [
+                            { text: 'Von 10:00 bis 12:00 Uhr', correct: false },
+                            { text: 'Von 09:00 bis 10:30 Uhr', correct: true },
+                            { text: 'Nur 10 Minuten', correct: false }
+                        ],
+                        explanation: 'Richtig! Tom war von 09:00 bis 10:30 Uhr in der Sporthalle.',
+                        clueText: '🔍 Trainer-Aussage: Der Basketballtrainer hat bestätigt, dass Tom das gesamte Training absolviert hat. (Alibi!)',
+                        innocent: true
+                    }
+                ]
+            },
+            {
+                id: 'case2',
+                number: 'Fall #2',
+                title: 'Der Diebstahl im Kunstmuseum',
+                location: 'STADT MANTUA',
+                level: 'Niveau A2',
+                levelTag: 'level-a2',
+                desc: 'Lukisan abstrak berharga bernilai tinggi hilang dari galeri seni pada pukul 14:00 Uhr saat pemeliharaan sistem museum.',
+                vocabList: [
+                    { de: 'das Kunstmuseum', id: 'Museum seni' },
+                    { de: 'das Gemälde / Kunstwerk', id: 'Lukisan / Karya seni' },
+                    { de: 'wertvoll', id: 'Berharga / Bernilai tinggi' },
+                    { de: 'der Raum / die Galerie', id: 'Ruangan / Galeri' },
+                    { de: 'die Bewachung', id: 'Penjagaan / Pengawalan' }
+                ],
+                suspects: []
+            },
+            {
+                id: 'case3',
+                number: 'Fall #3',
+                title: 'Das Geheimnis im Chemielabor',
+                location: 'FORSCHUNGSZENTRUM',
+                level: 'Niveau A2',
+                levelTag: 'level-a2',
+                desc: 'Formula eksperimen penting mendadak terhapus dari komputer laboratorium utama.',
+                suspects: []
+            },
+            {
+                id: 'case4',
+                number: 'Fall #4',
+                title: 'Das verschollene Fahrrad',
+                location: 'HAUPTBAHNHOF',
+                level: 'Niveau A1',
+                levelTag: 'level-a1',
+                desc: 'Sepeda balap kesayangan milik mahasiswa pertukaran hilang di depan stasiun kereta jam 08:00 Uhr.',
+                suspects: []
+            },
+            {
+                id: 'case5',
+                number: 'Fall #5',
+                title: 'Die mysteriöse E-Mail',
+                location: 'ICT CYBER CENTER',
+                level: 'Niveau B1',
+                levelTag: 'level-b1',
+                desc: 'Email phishing dikirimkan ke seluruh fakultas menggunakan akun administrator palsu.',
+                suspects: []
+            },
+            {
+                id: 'case6',
+                number: 'Fall #6',
+                title: 'Der Vorfall in der Kantine',
+                location: 'MENSAGARTEN',
+                level: 'Niveau A1',
+                levelTag: 'level-a1',
+                desc: 'Kotak kue cokelat buatan koki utama mendadak habis diambil seseorang sebelum acara dimulai.',
+                suspects: []
+            },
+            {
+                id: 'case7',
+                number: 'Fall #7',
+                title: 'Stromausfall im Rechenzentrum',
+                location: 'SERVERRAUM',
+                level: 'Niveau A2',
+                levelTag: 'level-a2',
+                desc: 'Listrik pusat server mendadak mati saat ujian coding daring sedang berlangsung.',
+                suspects: []
+            },
+            {
+                id: 'case8',
+                number: 'Fall #8',
+                title: 'Das verlorene Dokument',
+                location: 'RATHAUS BERLIN',
+                level: 'Niveau B1',
+                levelTag: 'level-b1',
+                desc: 'Dokumen beasiswa internasional milik pelamar hilang dari meja pendaftaran.',
+                suspects: []
+            },
+            {
+                id: 'case9',
+                number: 'Fall #9',
+                title: 'Sabotage auf dem Sportplatz',
+                location: 'STADION',
+                level: 'Niveau A2',
+                levelTag: 'level-a2',
+                desc: 'Peralatan latihan tim sepak bola kampus dirusak menjelang turnamen antar kota.',
+                suspects: []
+            },
+            {
+                id: 'case10',
+                number: 'Fall #10',
+                title: 'Der Ausfall im Rundfunkstudio',
+                location: 'CAMPUS RADIO',
+                level: 'Niveau B1',
+                levelTag: 'level-b1',
+                desc: 'Siaran radio live kampus mendadak terputus karena mikrofon utama dicabut.',
+                suspects: []
+            }
+        ];
+
+        // --- AUDIO SYSTEM ---
+        let synth, polySynth;
+
+        function initAudio() {
+            try {
+                if (typeof Tone !== 'undefined') {
+                    synth = new Tone.Synth().toDestination();
+                    polySynth = new Tone.PolySynth().toDestination();
+                }
+            } catch (e) {
+                console.log("Audio synth suppressed.");
+            }
+        }
+
+        function playSound(type) {
+            if (!gameState.soundEnabled) return;
+            try {
+                if (typeof Tone !== 'undefined') {
+                    if (Tone.context && Tone.context.state !== 'running') {
+                        Tone.start();
+                    }
+                    if (!synth) initAudio();
+
+                    if (type === 'click' && synth) {
+                        synth.triggerAttackRelease('C5', '8n');
+                    } else if (type === 'correct' && polySynth) {
+                        polySynth.triggerAttackRelease(['C5', 'E5', 'G5'], '8n');
+                    } else if (type === 'wrong' && polySynth) {
+                        polySynth.triggerAttackRelease(['Eb4', 'C4'], '6n');
+                    } else if (type === 'clue' && polySynth) {
+                        polySynth.triggerAttackRelease(['G4', 'B4', 'D5', 'F#5'], '4n');
+                    } else if (type === 'victory' && polySynth) {
+                        const now = Tone.now();
+                        polySynth.triggerAttackRelease(['C4', 'E4', 'G4', 'C5'], '4n', now);
+                        polySynth.triggerAttackRelease(['G4', 'B4', 'D5', 'G5'], '4n', now + 0.3);
+                    }
+                }
+            } catch (err) {
+                console.log("Audio notice:", err);
+            }
+        }
+
+        function toggleSound() {
+            gameState.soundEnabled = !gameState.soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            if (icon) icon.textContent = gameState.soundEnabled ? '🔊' : '🔇';
+        }
+
+        function toggleVocabModal() {
+            const modal = document.getElementById('vocabModal');
+            if (!modal) return;
+
+            const isOpening = modal.classList.contains('hidden');
+            
+            if (isOpening) {
+                const currentCase = getActiveCase();
+                const listContainer = document.getElementById('vocabModalList');
+                const titleEl = document.getElementById('vocabModalTitle');
+                const subEl = document.getElementById('vocabModalSub');
+
+                let listToRender = generalVocabList;
+
+                if (gameState.currentView === 'gameplay' && currentCase && currentCase.vocabList) {
+                    listToRender = currentCase.vocabList;
+                    if (titleEl) titleEl.textContent = `Wortschatz: ${currentCase.number}`;
+                    if (subEl) subEl.textContent = `Kosakata khusus untuk "${currentCase.title}"`;
+                } else {
+                    if (titleEl) titleEl.textContent = "Wortschatz-Helfer (Kamus Kosakata)";
+                    if (subEl) subEl.textContent = "Kosakata umum Bahasa Jerman untuk penyelidikan";
+                }
+
+                if (listContainer) {
+                    listContainer.innerHTML = listToRender.map(item => `
+                        <div class="vocab-item">
+                            <span class="vocab-de">${item.de}</span>
+                            <span class="vocab-id">${item.id}</span>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            modal.classList.toggle('hidden');
+        }
+
+        // --- VIEW SWITCHER (SPA CONTROL) ---
+        function switchView(viewName) {
+            playSound('click');
+            gameState.currentView = viewName;
+
+            const homeView = document.getElementById('viewHome');
+            const caseSelectView = document.getElementById('viewCaseSelect');
+            const gameplayView = document.getElementById('viewGameplay');
+            const navBackBtn = document.getElementById('navBackBtn');
+            const clueStatPill = document.getElementById('clueStatPill');
+            const subtitleHeader = document.getElementById('activeCaseHeaderSubtitle');
+
+            homeView.classList.add('hidden');
+            caseSelectView.classList.add('hidden');
+            gameplayView.classList.add('hidden');
+            navBackBtn.classList.add('hidden');
+            clueStatPill.style.display = 'none';
+
+            if (viewName === 'home') {
+                homeView.classList.remove('hidden');
+                if (subtitleHeader) subtitleHeader.textContent = "Deutsch Lernen durch Detektivarbeit";
+            } else if (viewName === 'case_select') {
+                caseSelectView.classList.remove('hidden');
+                renderCaseGrid();
+                if (subtitleHeader) subtitleHeader.textContent = "Wähle einen Fall (10 Fälle)";
+            } else if (viewName === 'gameplay') {
+                gameplayView.classList.remove('hidden');
+                navBackBtn.classList.remove('hidden');
+                clueStatPill.style.display = 'flex';
+                renderCurrentStep();
+            }
+        }
+
+        // --- RENDER 10 CASES GRID ---
+        function renderCaseGrid() {
+            const grid = document.getElementById('caseGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            casesDatabase.forEach((c) => {
+                const card = document.createElement('div');
+                card.className = 'case-card';
+                card.onclick = () => selectCase(c.id);
+
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span class="case-number">${c.number}</span>
+                        <span class="tag-level ${c.levelTag}">${c.level}</span>
+                    </div>
+                    <div class="case-title">${c.title}</div>
+                    <div class="case-desc">${c.desc}</div>
+                    <div class="case-meta">
+                        <span>📍 ${c.location}</span>
+                        <strong style="color: var(--amber-accent);">Spielen ➔</strong>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // --- SELECT A CASE ---
+        function selectCase(caseId) {
+            const selected = casesDatabase.find(c => c.id === caseId);
+            if (!selected) return;
+
+            gameState.activeCaseId = caseId;
+            gameState.currentStep = 0;
+            gameState.solvedSuspects = [];
+            gameState.unlockedClues = [];
+
+            const subtitleHeader = document.getElementById('activeCaseHeaderSubtitle');
+            if (subtitleHeader) subtitleHeader.textContent = `${selected.number}: ${selected.title}`;
+
+            const locTag = document.getElementById('sidebarLocationTag');
+            if (locTag) locTag.textContent = selected.location;
+
+            updateNotebook();
+            switchView('gameplay');
+        }
+
+        // --- GET ACTIVE CASE OBJECT ---
+        function getActiveCase() {
+            return casesDatabase.find(c => c.id === gameState.activeCaseId) || casesDatabase[0];
+        }
+
+        // --- RENDER SIDEBAR SUSPECT CARDS ---
+        function renderSuspectSidebar() {
+            const grid = document.getElementById('suspectGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            const currentCase = getActiveCase();
+            const suspects = currentCase.suspects || [];
+
+            if (suspects.length === 0) {
+                grid.innerHTML = `<div style="grid-column: 1 / -1; font-size: 0.75rem; color: var(--text-muted); text-align: center; padding: 1rem;">Fall in Vorbereitung...</div>`;
+                return;
+            }
+
+            suspects.forEach((s, idx) => {
+                const isSolved = gameState.solvedSuspects.includes(s.id);
+                const isCurrent = gameState.currentStep === idx + 1;
+
+                const card = document.createElement('div');
+                card.className = `suspect-card ${isCurrent ? 'active' : ''} ${isSolved ? 'solved' : ''}`;
+                card.onclick = () => {
+                    playSound('click');
+                    if (gameState.currentStep <= suspects.length) {
+                        gameState.currentStep = idx + 1;
+                        renderCurrentStep();
+                    }
+                };
+
+                card.innerHTML = `
+                    <div class="suspect-avatar">${s.avatar}</div>
+                    <div class="suspect-name">${s.name}</div>
+                    <div class="suspect-loc">${s.location}</div>
+                    ${isSolved ? '<div class="suspect-status">Untersucht ✓</div>' : ''}
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // --- UPDATE NOTEBOOK ---
+        function updateNotebook() {
+            const container = document.getElementById('notebookContent');
+            const countLabel = document.getElementById('clueCount');
+            const solveBtn = document.getElementById('solveCaseBtn');
+            const currentCase = getActiveCase();
+            const suspects = currentCase.suspects || [];
+
+            if (countLabel) countLabel.textContent = `${gameState.unlockedClues.length} / ${suspects.length}`;
+
+            if (!container) return;
+
+            if (gameState.unlockedClues.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 1.5rem 0; color: var(--text-muted);">
+                        <div style="font-size: 1.5rem; opacity: 0.5; margin-bottom: 0.4rem;">🔍</div>
+                        <p style="font-size: 0.75rem;">Noch keine Hinweise.</p>
+                        <p style="font-size: 0.65rem; opacity: 0.7;">Beantworte die Fragen!</p>
+                    </div>
+                `;
+                if (solveBtn) {
+                    solveBtn.disabled = true;
+                    solveBtn.style.cssText = "width: 100%; padding: 0.8rem; background: #1e293b; color: #64748b; cursor: not-allowed; margin-top: 0.5rem;";
+                }
+                return;
+            }
+
+            container.innerHTML = '';
+            gameState.unlockedClues.forEach((clue, i) => {
+                const item = document.createElement('div');
+                item.className = 'clue-card';
+                item.innerHTML = `
+                    <div class="clue-title">🔑 Hinweis #${i+1}</div>
+                    <div>${clue}</div>
+                `;
+                container.appendChild(item);
+            });
+
+            if (suspects.length > 0 && gameState.unlockedClues.length >= suspects.length && solveBtn) {
+                solveBtn.disabled = false;
+                solveBtn.className = "btn btn-amber pulse-btn";
+                solveBtn.style.cssText = "width: 100%; padding: 0.8rem; margin-top: 0.5rem;";
+            }
+        }
+
+        // --- RENDER MAIN GAME WINDOW ---
+        function renderCurrentStep() {
+            const windowEl = document.getElementById('gameWindow');
+            if (!windowEl) return;
+            renderSuspectSidebar();
+
+            const currentCase = getActiveCase();
+            const suspects = currentCase.suspects || [];
+
+            if (suspects.length === 0) {
+                windowEl.innerHTML = `
+                    <div style="text-align: center; padding: 3rem 1rem; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem;">
+                        <div style="font-size: 3rem;">🛠️</div>
+                        <h3 style="font-size: 1.25rem; font-weight: 700;">${currentCase.title}</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 400px;">
+                            Tema kasus ini siap dikembangkan untuk modul pembelajaran berikutnya!
+                        </p>
+                        <button onclick="switchView('case_select')" class="btn btn-amber">
+                            ← Wähle einen anderen Fall (Pilih Kasus Lain)
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            if (gameState.currentStep === 0) {
+                // INTRO SCREEN FOR SELECTED CASE
+                windowEl.innerHTML = `
+                    <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.25rem; flex: 1; padding: 1rem 0;">
+                        <div style="width: 70px; height: 70px; border-radius: 20px; background: linear-gradient(135deg, var(--amber-hover), var(--amber-accent)); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: #0b1120; box-shadow: 0 10px 25px rgba(245,158,11,0.3);">
+                            🕵️
+                        </div>
+
+                        <div>
+                            <span class="badge-ict" style="font-size: 0.75rem; padding: 0.25rem 0.75rem;">${currentCase.number} • ${currentCase.level}</span>
+                            <h2 style="font-size: 1.75rem; font-weight: 800; color: #f8fafc; margin-top: 0.5rem;">
+                                ${currentCase.title.toUpperCase()}
+                            </h2>
+                            <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 500px; margin: 0.5rem auto 0; line-height: 1.5;">
+                                ${currentCase.desc}
+                            </p>
+                        </div>
+
+                        <div style="background: rgba(15,23,42,0.8); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem; text-align: left; max-width: 500px; width: 100%; font-size: 0.75rem; color: #cbd5e1; display: flex; flex-direction: column; gap: 0.4rem;">
+                            <div style="color: var(--amber-accent); font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 0.3rem; margin-bottom: 0.2rem;">📋 ATURAN DETEKTIF / RULES:</div>
+                            <div>1. Baca statement Bahasa Jerman (Leseverstehen) dari 4 tersangka.</div>
+                            <div>2. Jawab pertanyaan pemahaman untuk membuka <strong>Clue / Hinweis</strong>.</div>
+                            <div>3. Bandingkan alibi! Siapa yang GELOGEN / berbohong?</div>
+                        </div>
+
+                        <button onclick="nextStep()" class="btn btn-amber" style="padding: 0.85rem 2rem; font-size: 0.9rem;">
+                            <span>Ermittlung Starten (Mulai Penyelidikan)</span> ➔
+                        </button>
+                    </div>
+                `;
+            } else if (gameState.currentStep >= 1 && gameState.currentStep <= suspects.length) {
+                // INVESTIGATION
+                const currentSuspect = suspects[gameState.currentStep - 1];
+                const isAlreadySolved = gameState.solvedSuspects.includes(currentSuspect.id);
+
+                windowEl.innerHTML = `
+                    <div style="display: flex; flex-direction: column; justify-content: space-between; height: 100%; gap: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span class="badge-ict">VERDÄCHTIGER #${gameState.currentStep} / ${suspects.length}</span>
+                                <h3 style="font-size: 1.1rem; font-weight: 700; color: #f8fafc;">${currentSuspect.name} (${currentSuspect.major})</h3>
+                            </div>
+                            <span style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">Uhrzeit: <strong style="color: var(--amber-accent);">${currentSuspect.time}</strong></span>
+                        </div>
+
+                        <div class="statement-box">
+                            <div class="statement-avatar">${currentSuspect.avatar}</div>
+                            <div>
+                                <div style="font-size: 0.7rem; color: var(--amber-accent); font-weight: 700; text-transform: uppercase;">💬 Zeugenaussage (Pernyataan Saksi)</div>
+                                <div class="statement-text">"${currentSuspect.statement}"</div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style="font-size: 0.85rem; font-weight: 700; color: #fde68a; margin-bottom: 0.5rem;">
+                                ❓ Frage: ${currentSuspect.question}
+                            </div>
+
+                            <div class="options-grid">
+                                ${currentSuspect.options.map((opt, i) => `
+                                    <button onclick="submitAnswer(${gameState.currentStep - 1}, ${i})" 
+                                            ${isAlreadySolved ? 'disabled' : ''} 
+                                            class="option-btn ${isAlreadySolved && opt.correct ? 'correct' : ''}">
+                                        <span>${String.fromCharCode(65 + i)}. ${opt.text}</span>
+                                        ${isAlreadySolved && opt.correct ? '<span style="color:#34d399; font-weight:bold;">✓</span>' : ''}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <div id="feedbackArea" style="min-height: 40px;">
+                            ${isAlreadySolved ? `
+                                <div style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #34d399; padding: 0.6rem; border-radius: 8px; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+                                    <span>✓ Hinweis bereits im Notizbuch freigeschaltet!</span>
+                                    <button onclick="nextStep()" class="btn btn-amber" style="padding: 0.3rem 0.6rem; font-size: 0.7rem;">
+                                        Nächster →
+                                    </button>
+                                </div>
+                            ` : '<p style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;">Pilih jawaban yang benar untuk membuka petunjuk.</p>'}
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
+                            <button onclick="prevStep()" ${gameState.currentStep === 1 ? 'disabled style="opacity:0.4;"' : ''} class="btn">
+                                ← Zurück
+                            </button>
+                            <button onclick="nextStep()" class="btn btn-amber">
+                                Weiter →
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (gameState.currentStep === suspects.length + 1) {
+                renderAccusationPhase();
+            }
+        }
+
+        // --- ANSWER SUBMISSION ---
+        function submitAnswer(suspectIdx, optionIdx) {
+            const currentCase = getActiveCase();
+            const suspect = currentCase.suspects[suspectIdx];
+            const selectedOpt = suspect.options[optionIdx];
+            const feedbackArea = document.getElementById('feedbackArea');
+
+            if (selectedOpt.correct) {
+                playSound('correct');
+                gameState.score += 25;
+                const scoreEl = document.getElementById('scoreText');
+                if (scoreEl) scoreEl.textContent = `${gameState.score} Pkt`;
+
+                if (!gameState.solvedSuspects.includes(suspect.id)) {
+                    gameState.solvedSuspects.push(suspect.id);
+                    gameState.unlockedClues.push(suspect.clueText);
+                    playSound('clue');
+                }
+
+                updateNotebook();
+                renderSuspectSidebar();
+
+                if (feedbackArea) {
+                    feedbackArea.innerHTML = `
+                        <div class="animate-fade-in" style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.4); color: #34d399; padding: 0.75rem; border-radius: 10px; font-size: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem;">
+                            <div style="font-weight: 700;">✓ ${suspect.explanation}</div>
+                            <div style="background: rgba(15,23,42,0.6); padding: 0.5rem; border-radius: 6px; color: #f8fafc;">
+                                <strong style="color: var(--amber-accent);">Neuer Hinweis:</strong> ${suspect.clueText}
+                            </div>
+                            <div style="text-align: right; margin-top: 0.2rem;">
+                                <button onclick="nextStep()" class="btn btn-amber" style="padding: 0.35rem 0.8rem; font-size: 0.75rem;">
+                                    Weiter zum nächsten Schritt →
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+            } else {
+                playSound('wrong');
+                if (feedbackArea) {
+                    feedbackArea.innerHTML = `
+                        <div class="animate-fade-in" style="background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.4); color: #fca5a5; padding: 0.6rem 0.8rem; border-radius: 8px; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+                            <span>⚠️ Falsch! Lies die Zeugenaussage nochmal genau durch.</span>
+                            <span style="font-size: 0.7rem; font-family: monospace;">-5 Pkt</span>
+                        </div>
+                    `;
+                }
+                if (gameState.score > 0) gameState.score -= 5;
+                const scoreEl = document.getElementById('scoreText');
+                if (scoreEl) scoreEl.textContent = `${gameState.score} Pkt`;
+            }
+        }
+
+        // --- FINAL ACCUSATION PHASE ---
+        function renderAccusationPhase() {
+            const currentCase = getActiveCase();
+            const suspects = currentCase.suspects || [];
+            gameState.currentStep = suspects.length + 1;
+            renderSuspectSidebar();
+
+            const windowEl = document.getElementById('gameWindow');
+            if (!windowEl) return;
+
+            windowEl.innerHTML = `
+                <div style="display: flex; flex-direction: column; justify-content: space-between; height: 100%; gap: 1rem;">
+                    <div style="text-align: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+                        <span class="badge-ict">🔓 DAS FINALE / DIE BESCHULDIGUNG</span>
+                        <h2 style="font-size: 1.5rem; font-weight: 800; color: #f8fafc; margin-top: 0.25rem;">WER IST DER TÄTER?</h2>
+                        <p style="font-size: 0.75rem; color: var(--text-muted);">
+                            Bandingkan alibi di Notizbuch! Siapa yang berbohong pada waktu kejadian?
+                        </p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+                        ${suspects.map(s => `
+                            <div onclick="selectCulprit('${s.id}')" id="accuse-${s.id}" class="suspect-card" style="padding: 1rem;">
+                                <div style="font-size: 2.2rem; margin-bottom: 0.2rem;">${s.avatar}</div>
+                                <div style="font-weight: 700; color: #f8fafc; font-size: 0.9rem;">${s.name}</div>
+                                <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.2rem;">${s.location}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div id="accusationConfirmBox" style="background: rgba(15,23,42,0.8); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem; text-align: center; min-height: 80px; display: flex; align-items: center; justify-content: center;">
+                        <p style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;">Pilih salah satu tersangka di atas untuk melakukan tuduhan akhir!</p>
+                    </div>
+
+                    <div style="border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
+                        <button onclick="gameState.currentStep = 1; renderCurrentStep();" class="btn">
+                            ← Hinweise überprüfen (Cek Ulang)
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectCulprit(suspectId) {
+            playSound('click');
+            const currentCase = getActiveCase();
+            const suspects = currentCase.suspects || [];
+
+            suspects.forEach(s => {
+                const card = document.getElementById(`accuse-${s.id}`);
+                if (card) {
+                    if (s.id === suspectId) {
+                        card.style.borderColor = "var(--amber-accent)";
+                        card.style.background = "rgba(245, 158, 11, 0.2)";
+                        card.style.transform = "scale(1.03)";
+                    } else {
+                        card.style.borderColor = "var(--border-color)";
+                        card.style.background = "rgba(15, 23, 42, 0.7)";
+                        card.style.transform = "none";
+                    }
+                }
+            });
+
+            const confirmBox = document.getElementById('accusationConfirmBox');
+            const chosen = suspects.find(s => s.id === suspectId);
+
+            if (confirmBox && chosen) {
+                confirmBox.innerHTML = `
+                    <div style="width: 100%; text-align: left; display: flex; flex-direction: column; gap: 0.5rem;">
+                        <div style="font-size: 0.8rem; color: var(--amber-accent); font-weight: 700;">
+                            Bist du sicher, dass <u>${chosen.name}</u> der Täter ist?
+                        </div>
+                        <button onclick="verifyTäter('${suspectId}')" class="btn btn-amber" style="padding: 0.75rem; width: 100%;">
+                            Ja! ${chosen.name} festnehmen (Tangkap ${chosen.name}!) ⚖️
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function verifyTäter(suspectId) {
+            const windowEl = document.getElementById('gameWindow');
+            const currentCase = getActiveCase();
+            const suspects = currentCase.suspects || [];
+            const chosen = suspects.find(s => s.id === suspectId);
+
+            if (!windowEl || !chosen) return;
+
+            if (!chosen.innocent) {
+                // SUCCESS
+                playSound('victory');
+                gameState.score += 50;
+                const scoreEl = document.getElementById('scoreText');
+                if (scoreEl) scoreEl.textContent = `${gameState.score} Pkt`;
+
+                const vocabHtml = currentCase.vocabList ? `
+                    <div style="background: rgba(15,23,42,0.9); border: 1px solid var(--border-color); border-radius: 12px; padding: 0.85rem; width: 100%; max-width: 480px; text-align: left; margin-top: 0.25rem;">
+                        <div style="color: var(--amber-accent); font-weight: 700; font-size: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.3rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem;">
+                            <span>📖 WORTSCHATZ RECAP (${currentCase.number}):</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.4rem; max-height: 120px; overflow-y: auto; padding-right: 0.2rem;">
+                            ${currentCase.vocabList.map(v => `
+                                <div style="font-size: 0.7rem; background: rgba(30,41,59,0.6); padding: 0.3rem 0.5rem; border-radius: 6px; display: flex; justify-content: space-between;">
+                                    <strong style="color: #f8fafc;">${v.de}</strong>
+                                    <span style="color: var(--text-muted);">${v.id}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : '';
+
+                windowEl.innerHTML = `
+                    <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.85rem; flex: 1; padding: 0.5rem 0;">
+                        <div style="font-size: 3rem; background: rgba(16,185,129,0.2); border: 2px solid var(--emerald-green); border-radius: 20px; width: 75px; height: 75px; display: flex; align-items: center; justify-content: center;">
+                            ${chosen.avatar}
+                        </div>
+
+                        <div>
+                            <h2 style="font-size: 1.4rem; font-weight: 800; color: #34d399;">
+                                RICHTIG! ${chosen.name.toUpperCase()} IST DER TÄTER! 🎉
+                            </h2>
+                            <p style="font-size: 0.8rem; color: #e2e8f0; max-width: 480px; margin-top: 0.3rem; line-height: 1.4;">
+                                <strong style="color: var(--amber-accent);">Alibi-Bruch:</strong> Lukas mengaku makan pizza di Mensa pukul 10:00 Uhr. Padahal kata koki Mensa baru buka pukul 11:30 Uhr! Lukas berbohong!
+                            </p>
+                        </div>
+
+                        <div style="background: rgba(15,23,42,0.8); border: 1px solid var(--border-color); border-radius: 12px; padding: 0.6rem 1.2rem; display: flex; gap: 2rem; text-align: left;">
+                            <div>
+                                <div style="font-size: 0.65rem; color: var(--text-muted);">Punkte</div>
+                                <div style="font-size: 1.1rem; font-weight: 800; color: var(--amber-accent);">${gameState.score} Pkt</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.65rem; color: var(--text-muted);">Hinweise</div>
+                                <div style="font-size: 1.1rem; font-weight: 800; color: #34d399;">${gameState.unlockedClues.length} / ${suspects.length}</div>
+                            </div>
+                        </div>
+
+                        ${vocabHtml}
+
+                        <div style="display:flex; gap:0.75rem; margin-top: 0.25rem;">
+                            <button onclick="switchView('case_select')" class="btn btn-amber" style="padding: 0.65rem 1.25rem;">
+                                📋 Weitere Fälle (Pilih Kasus Lain)
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // FAIL
+                playSound('wrong');
+                windowEl.innerHTML = `
+                    <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; flex: 1;">
+                        <div style="font-size: 3.5rem; background: rgba(239,68,68,0.2); border: 2px solid var(--rose-red); border-radius: 20px; width: 90px; height: 90px; display: flex; align-items: center; justify-content: center;">
+                            ❌
+                        </div>
+
+                        <div>
+                            <h2 style="font-size: 1.5rem; font-weight: 800; color: #fca5a5;">
+                                FALSCH! ${chosen.name.toUpperCase()} IST UNSCHULDIG!
+                            </h2>
+                            <p style="font-size: 0.8rem; color: #e2e8f0; max-width: 450px; margin-top: 0.4rem; line-height: 1.5;">
+                                ${chosen.name} punya alibi kuat yang dikonfirmasi oleh saksi lain!
+                            </p>
+                        </div>
+
+                        <button onclick="renderAccusationPhase()" class="btn btn-amber" style="padding: 0.75rem 1.5rem;">
+                            Nochmal versuchen (Coba lagi)
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // --- NAVIGATION CONTROLS ---
+        function nextStep() {
+            playSound('click');
+            const currentCase = getActiveCase();
+            const suspects = currentCase.suspects || [];
+
+            if (gameState.currentStep < suspects.length) {
+                gameState.currentStep++;
+                renderCurrentStep();
+            } else {
+                renderAccusationPhase();
+            }
+        }
+
+        function prevStep() {
+            playSound('click');
+            if (gameState.currentStep > 1) {
+                gameState.currentStep--;
+                renderCurrentStep();
+            }
+        }
+
+        // --- INIT ON LOAD ---
+        window.onload = function() {
+            switchView('home');
+        };
+    </script>
+</body>
+</html>
