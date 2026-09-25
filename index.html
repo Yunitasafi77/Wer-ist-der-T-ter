@@ -17,8 +17,8 @@
             --panel-bg: rgba(30, 41, 59, 0.85);
             --card-inner: #1e293b;
             --border-color: #334155;
-            --amber-accent: #f59e0b;
-            --amber-hover: #d97706;
+            --amber-accent: #fef3c7;
+            --amber-hover: #5c0000;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --emerald-green: #10b981;
@@ -104,7 +104,7 @@
         .badge-ict {
             font-size: 0.65rem;
             background: rgba(245, 158, 11, 0.15);
-            color: var(--amber-accent);
+            color: #ffff;
             border: 1px solid rgba(245, 158, 11, 0.3);
             padding: 0.15rem 0.5rem;
             border-radius: 20px;
@@ -152,7 +152,7 @@
         }
 
         .btn-amber {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
+            background: linear-gradient(135deg, #5c0000, #8b0000);
             color: #090d16;
             border: none;
             box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
@@ -200,7 +200,7 @@
             background: rgba(245, 158, 11, 0.1);
             border: 1px solid rgba(245, 158, 11, 0.3);
             border-radius: 30px;
-            color: var(--amber-accent);
+            color: #fef3c7;
             font-size: 0.85rem;
             font-weight: 700;
         }
@@ -231,8 +231,8 @@
         }
 
         .feature-card {
-            background: var(--panel-bg);
-            border: 1px solid var(--border-color);
+            background: #5c0000;
+            border: 1px solid #5c0000;
             padding: 1.25rem;
             border-radius: 16px;
             text-align: left;
@@ -657,7 +657,13 @@
     background-color: #5c0000 !important;
     border: 1px solid #8b0000 !important;
 }
-      
+      .suspect-card.selected, 
+.suspect-card.active,
+div[style*="border-color: var(--amber-accent)"],
+div[style*="border-color: #f59e0b"] {
+    border-color: #5c0000 !important;
+    background: rgba(92, 0, 0, 0.3) !important;
+}
     </style>
 </head>
 <body>
@@ -793,9 +799,9 @@
                     </div>
 
                     <!-- Final Accusation Button -->
-                    <button id="solveCaseBtn" onclick="renderAccusationPhase()" disabled class="btn" style="width: 100%; padding: 0.8rem; background: #1e293b; color: #64748b; cursor: not-allowed; margin-top: 0.5rem;">
-                        ⚖️ WER IST DER TÄTER?
-                    </button>
+                    <button id="solveCaseBtn" onclick="renderAccusationPhase()" disabled class="btn" style="width: 100%; padding: 0.8rem; background: #5c0000; color: #ffe4bc; cursor: not-allowed; margin-top: 0.5rem;">
+    ⚖️ WER IST DER TÄTER?
+</button>
                 </div>
             </aside>
 
@@ -1366,9 +1372,9 @@ windowEl.innerHTML = `
                     <div style="display: flex; flex-direction: column; justify-content: space-between; height: 100%; gap: 1rem;">
                         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <span class="badge-ict">VERDÄCHTIGER #${gameState.currentStep} / ${suspects.length}</span>
-                                <h3 style="font-size: 1.1rem; font-weight: 700; color: #f8fafc;">${currentSuspect.name} (${currentSuspect.major})</h3>
-                            </div>
+    <span class="badge-ict" style="background-color: #5c0000; color: #ffff;">VERDÄCHTIGER #${gameState.currentStep} / ${suspects.length}</span>
+    <h3 style="font-size: 1.1rem; font-weight: 700; color: #f8fafc;">${currentSuspect.name} (${currentSuspect.major})</h3>
+</div>
                             <span style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">Uhrzeit: <strong style="color: var(--amber-accent);">${currentSuspect.time}</strong></span>
                         </div>
 
@@ -1401,9 +1407,9 @@ windowEl.innerHTML = `
                             ${isAlreadySolved ? `
                                 <div style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #34d399; padding: 0.6rem; border-radius: 8px; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
                                     <span>✓ Hinweis bereits im Notizbuch freigeschaltet!</span>
-                                    <button onclick="nextStep()" class="btn btn-amber" style="padding: 0.3rem 0.6rem; font-size: 0.7rem;">
-                                        Nächster →
-                                    </button>
+                                    <button onclick="nextStep()" class="btn btn-amber" style="color: #ffffff; padding: 0.3rem 0.6rem; font-size: 0.7rem;">
+    Nächster →
+</button>
                                 </div>
                             ` : '<p style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;">Pilih jawaban yang benar untuk membuka petunjuk.</p>'}
                         </div>
@@ -1412,9 +1418,9 @@ windowEl.innerHTML = `
                             <button onclick="prevStep()" ${gameState.currentStep === 1 ? 'disabled style="opacity:0.4;"' : ''} class="btn">
                                 ← Zurück
                             </button>
-                            <button onclick="nextStep()" class="btn btn-amber">
-                                Weiter →
-                            </button>
+                            <button onclick="nextStep()" class="btn" style="background-color: #5c0000; color: #ffff;">
+    Weiter →
+</button>
                         </div>
                     </div>
                 `;
@@ -1453,10 +1459,10 @@ windowEl.innerHTML = `
                                 <strong style="color: var(--amber-accent);">Neuer Hinweis:</strong> ${suspect.clueText}
                             </div>
                             <div style="text-align: right; margin-top: 0.2rem;">
-                                <button onclick="nextStep()" class="btn btn-amber" style="padding: 0.35rem 0.8rem; font-size: 0.75rem;">
-                                    Weiter zum nächsten Schritt →
-                                </button>
-                            </div>
+    <button onclick="nextStep()" class="btn" style="padding: 0.35rem 0.8rem; font-size: 0.75rem; background-color: #5c0000; color: #ffff;">
+        Weiter zum nächsten Schritt →
+    </button>
+</div>
                         </div>
                     `;
                 }
@@ -1489,7 +1495,7 @@ windowEl.innerHTML = `
             windowEl.innerHTML = `
                 <div style="display: flex; flex-direction: column; justify-content: space-between; height: 100%; gap: 1rem;">
                     <div style="text-align: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
-                        <span class="badge-ict">🔓 DAS FINALE / DIE BESCHULDIGUNG</span>
+                        <span class="badge-ict" style="background-color: #5c0000;">🔓 DAS FINALE / DIE BESCHULDIGUNG</span>
                         <h2 style="font-size: 1.5rem; font-weight: 800; color: #f8fafc; margin-top: 0.25rem;">WER IST DER TÄTER?</h2>
                         <p style="font-size: 0.75rem; color: var(--text-muted);">
                             Bandingkan alibi di Notizbuch! Siapa yang berbohong pada waktu kejadian?
@@ -1545,10 +1551,10 @@ windowEl.innerHTML = `
             if (confirmBox && chosen) {
                 confirmBox.innerHTML = `
                     <div style="width: 100%; text-align: left; display: flex; flex-direction: column; gap: 0.5rem;">
-                        <div style="font-size: 0.8rem; color: var(--amber-accent); font-weight: 700;">
+                        <div style="font-size: 0.8rem; color: #ffff; font-weight: 700;">
                             Bist du sicher, dass <u>${chosen.name}</u> der Täter ist?
                         </div>
-                        <button onclick="verifyTäter('${suspectId}')" class="btn btn-amber" style="padding: 0.75rem; width: 100%;">
+                        <button onclick="verifyTäter('${suspectId}')" class="btn btn-amber" style="color: #ffffff;padding: 0.75rem; width: 100%;">
                             Ja! ${chosen.name} festnehmen (Tangkap ${chosen.name}!) ⚖️
                         </button>
                     </div>
