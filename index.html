@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wer ist der Täter? - Digital Mystery Game</title>
+    <title>Wer ist der Täter? - Digital Mystery Game</title>
 
     <!-- Google Fonts & Tone.js Audio Library -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -664,6 +665,18 @@ div[style*="border-color: #f59e0b"] {
     border-color: #5c0000 !important;
     background: rgba(92, 0, 0, 0.3) !important;
 }
+      /* Atur tampilan agar rapi di layar HP */
+@media (max-width: 768px) {
+    #viewGameplay, .game-layout {
+        flex-direction: column !important; /* Paksa layout jadi memanjang ke bawah */
+    }
+    
+    /* Lebarkan semua panel agar muat di layar HP */
+    aside, main, .glass-panel {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+}
     </style>
 </head>
 <body>
@@ -764,6 +777,31 @@ div[style*="border-color: #f59e0b"] {
                 <!-- 10 Case Cards dynamically populated by JS -->
             </div>
         </section>
+      <!-- VIEW BARU: STORY VIEW -->
+<section id="viewStory" style="display: none; padding: 1.5rem; color: #ffffff;">
+    <div class="glass-panel" style="max-width: 600px; margin: 0 auto; padding: 1.5rem; text-align: center;">
+        <h2 style="color: #ff4d4d; margin-bottom: 1rem;">📜 Geschichte des Falls</h2>
+        
+        <!-- Wadah Teks Cerita Utama -->
+        <div id="storyTextContent" style="font-size: 0.95rem; line-height: 1.6; text-align: left; margin-bottom: 2rem; background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px;">
+            <p>Smartphone milik Prof. Schneider mendadak hilang di kampus pada pukul 10:00 Uhr pagi! Siapa pelakunya?</p>
+            <p>Lies die Aussagen der Verdächtigen aufmerksam durch, um den Täter zu entlarven.</p>
+        </div>
+
+        <!-- Navigasi Tombol Zurück dan Weiter -->
+        <div style="display: flex; justify-content: space-between; gap: 1rem;">
+            <!-- Tombol Zurück (Di-disable / tidak bisa diklik secara bawaan) -->
+            <button onclick="prevStep()" class="btn">
+    ← Zurück
+</button>
+
+            <!-- Tombol Weiter (Untuk masuk ke gameplay) -->
+            <button onclick="startInvestigationFromStory()" class="btn" style="background: #5c0000; color: #ffffff; flex: 1; font-weight: bold;">
+                Weiter →
+            </button>
+        </div>
+    </div>
+</section>
 
         <!-- VIEW 3: GAMEPLAY VIEW -->
         <section id="viewGameplay" class="game-layout hidden">
@@ -783,20 +821,21 @@ div[style*="border-color: #f59e0b"] {
                 </div>
 
                 <!-- Clue Notebook -->
-                <div class="glass-panel" style="flex: 1;">
-                    <div class="panel-header">
-                        <div class="panel-title">📔 Ermittlungs-Notizbuch</div>
-                        <span style="font-size: 0.65rem; color: var(--text-muted);">Clues</span>
-                    </div>
-                    <p style="font-size: 0.7rem; color: var(--text-muted);">Gesammelte Hinweise erscheinen hier:</p>
+<div id="notebookSection" class="glass-panel" style="display: none;">
+    <div class="panel-header">
+        <div class="panel-title">📔 Ermittlungs-Notizbuch</div>
+        <span style="font-size: 0.65rem; color: var(--text-muted);">Clues</span>
+    </div>
+    <p style="font-size: 0.7rem; color: var(--text-muted);">Gesammelte Hinweise erscheinen hier:</p>
 
-                    <div id="notebookContent" class="notebook-box">
-                        <div style="text-align: center; padding: 1.5rem 0; color: var(--text-muted);">
-                            <div style="font-size: 1.5rem; opacity: 0.5; margin-bottom: 0.4rem;">🔍</div>
-                            <p style="font-size: 0.75rem;">Noch keine Hinweise.</p>
-                            <p style="font-size: 0.65rem; opacity: 0.7;">Beantworte die Fragen!</p>
-                        </div>
-                    </div>
+    <div id="notebookContent" class="notebook-box">
+        <div style="text-align: center; padding: 1.5rem 0; color: var(--text-muted);">
+            <div style="font-size: 1.5rem; opacity: 0.5; margin-bottom: 0.4rem;">🔍</div>
+            <p style="font-size: 0.75rem;">Noch keine Hinweise.</p>
+            <p style="font-size: 0.65rem; opacity: 0.7;">Beantworte die Fragen!</p>
+        </div>
+    </div>
+</div>
 
                     <!-- Final Accusation Button -->
                     <button id="solveCaseBtn" onclick="renderAccusationPhase()" disabled class="btn" style="width: 100%; padding: 0.8rem; background: #5c0000; color: #ffe4bc; cursor: not-allowed; margin-top: 0.5rem;">
@@ -850,6 +889,57 @@ div[style*="border-color: #f59e0b"] {
             unlockedClues: [],
             selectedAccusation: null
         };
+      // Variabel untuk mencatat apakah pemain sudah pernah masuk ke gameplay
+let hasStartedGameplay = false;
+
+// 1. Fungsi untuk membuka halaman cerita
+function openStoryView() {
+    playSound('click'); // <-- Tambahkan baris ini
+    
+    // ... Sisa kode openStoryView kamu di bawahnya ...
+    if (document.getElementById('viewIntro')) document.getElementById('viewIntro').style.display = 'none';
+    if (document.getElementById('viewGameplay')) document.getElementById('viewGameplay').style.display = 'none';
+    document.getElementById('viewStory').style.display = 'block';
+
+    // Cek status tombol Zurück: HANYA aktif jika sudah pernah masuk gameplay
+    const backBtn = document.getElementById('btnStoryBack');
+    if (hasStartedGameplay) {
+        backBtn.disabled = false;
+        backBtn.style.background = '#5c0000';
+        backBtn.style.color = '#ffffff';
+        backBtn.style.cursor = 'pointer';
+    } else {
+        backBtn.disabled = true;
+        backBtn.style.background = '#333333';
+        backBtn.style.color = '#888888';
+        backBtn.style.cursor = 'not-allowed';
+    }
+}
+
+// 2. Fungsi saat tombol "Weiter →" diklik (Lanjut ke Gameplay)
+function startInvestigationFromStory() {
+  playSound('click');
+    hasStartedGameplay = true;
+    
+    // Sembunyikan Story View & Tampilkan Gameplay
+    document.getElementById('viewStory').style.display = 'none';
+    document.getElementById('viewGameplay').style.display = 'flex';
+    
+    // Jika baru pertama kali mulai (masih di step 0/belum set), set ke step 1 (Anna)
+    if (!gameState.currentStep || gameState.currentStep < 1) {
+        gameState.currentStep = 1;
+    }
+    
+    renderCurrentStep();
+}
+
+// 3. Fungsi saat tombol "← Zurück" diklik (Kembali ke Gameplay)
+function goBackFromStory() {
+    if (hasStartedGameplay) {
+        document.getElementById('viewStory').style.display = 'none';
+        document.getElementById('viewGameplay').style.display = 'flex';
+    }
+}
 
         // --- GENERAL FALLBACK VOCABULARY ---
         const generalVocabList = [
@@ -1325,9 +1415,9 @@ div[style*="border-color: #f59e0b"] {
                         <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 400px;">
                             Tema kasus ini siap dikembangkan untuk modul pembelajaran berikutnya!
                         </p>
-                        <button onclick="switchView('case_select')" class="btn btn-amber">
-                            ← Wähle einen anderen Fall (Pilih Kasus Lain)
-                        </button>
+                        <button onclick="switchView('case_select')" class="btn btn-amber" style="color: #ffffff;">
+    ← Wähle einen anderen Fall (Pilih Kasus Lain)
+</button>
                     </div>
                 `;
                 return;
@@ -1358,9 +1448,10 @@ windowEl.innerHTML = `
             <div>3. Bandingkan alibi! Siapa yang GELOGEN / berbohong?</div>
         </div>
 
-        <button onclick="nextStep()" class="btn" style="background-color: #5c0000; color: #ffffff; padding: 0.85rem 2rem; font-size: 0.9rem; border: none; cursor: pointer; border-radius: 8px;">
-            <span>Ermittlung Starten (Mulai Penyelidikan)</span> ➔
-        </button>
+        <!-- UBAH onclick NYA JADI openStoryView() -->
+<button onclick="openStoryView()" class="btn" style="background: #5c0000; color: #ffe4bc; width: 100%; padding: 0.8rem; font-weight: bold;">
+    Ermittlung Starten (Mulai Penyelidikan) →
+</button>
     </div>
                 `;
             } else if (gameState.currentStep >= 1 && gameState.currentStep <= suspects.length) {
@@ -1415,9 +1506,9 @@ windowEl.innerHTML = `
                         </div>
 
                         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
-                            <button onclick="prevStep()" ${gameState.currentStep === 1 ? 'disabled style="opacity:0.4;"' : ''} class="btn">
-                                ← Zurück
-                            </button>
+                            <button onclick="prevStep()" class="btn">
+    ← Zurück
+</button>
                             <button onclick="nextStep()" class="btn" style="background-color: #5c0000; color: #ffff;">
     Weiter →
 </button>
@@ -1622,10 +1713,10 @@ windowEl.innerHTML = `
                         ${vocabHtml}
 
                         <div style="display:flex; gap:0.75rem; margin-top: 0.25rem;">
-                            <button onclick="switchView('case_select')" class="btn btn-amber" style="padding: 0.65rem 1.25rem;">
-                                📋 Weitere Fälle (Pilih Kasus Lain)
-                            </button>
-                        </div>
+    <button onclick="switchView('case_select')" class="btn btn-amber" style="color: #ffffff; padding: 0.65rem 1.25rem;">
+        📋 Weitere Fälle (Pilih Kasus Lain)
+    </button>
+</div>
                     </div>
                 `;
             } else {
@@ -1654,32 +1745,54 @@ windowEl.innerHTML = `
             }
         }
 
-        // --- NAVIGATION CONTROLS ---
         function nextStep() {
-            playSound('click');
-            const currentCase = getActiveCase();
-            const suspects = currentCase.suspects || [];
+    playSound('click'); //[cite: 4]
+    
+    // Pastikan notebook TETAP tersembunyi selama jawab pertanyaan[cite: 3]
+    const notebook = document.getElementById('notebookSection');
+    if (notebook) {
+        notebook.style.display = 'none'; // Tetap sembunyi dulu[cite: 3]
+    }
 
-            if (gameState.currentStep < suspects.length) {
-                gameState.currentStep++;
-                renderCurrentStep();
-            } else {
-                renderAccusationPhase();
-            }
+    const currentCase = getActiveCase(); //[cite: 4]
+    const suspects = currentCase.suspects || []; //[cite: 4]
+
+    if (gameState.currentStep < suspects.length) { //[cite: 4]
+        gameState.currentStep++; //[cite: 4]
+        renderCurrentStep(); //[cite: 4]
+    } else {
+        renderAccusationPhase(); //[cite: 4]
+        
+        // HANYA MUNCULKAN NOTEBOOK saat masuk ke Fase Akhir/Tuduhan![cite: 3]
+        if (notebook) {
+            notebook.style.display = 'block'; //[cite: 3]
         }
+    }
+}
 
         function prevStep() {
-            playSound('click');
-            if (gameState.currentStep > 1) {
-                gameState.currentStep--;
-                renderCurrentStep();
-            }
+    playSound('click');
+    
+    // Jika sedang di Anna (step 0 atau 1), paksa pindah ke halaman cerita (viewStory)!
+    if (!gameState.currentStep || gameState.currentStep <= 1) {
+        document.getElementById('viewGameplay').style.display = 'none';
+        document.getElementById('viewStory').style.display = 'block';
+        
+        // Pastikan tombol Zurück di Halaman Cerita aktif
+        hasStartedGameplay = true;
+        const backBtn = document.getElementById('btnStoryBack');
+        if (backBtn) {
+            backBtn.disabled = false;
+            backBtn.style.background = '#5c0000';
+            backBtn.style.color = '#ffffff';
+            backBtn.style.cursor = 'pointer';
         }
-
-        // --- INIT ON LOAD ---
-        window.onload = function() {
-            switchView('home');
-        };
+    } else {
+        // Jika sedang di tersangka ke-2, 3, atau 4 -> Mundur ke pertanyaan sebelumnya
+        gameState.currentStep--;
+        renderCurrentStep();
+    }
+};
     </script>
 </body>
 </html>
