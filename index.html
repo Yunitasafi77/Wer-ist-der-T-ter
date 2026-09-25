@@ -224,7 +224,7 @@
         .feature-cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1rem;
+            gap: rem;
             width: 100%;
             max-width: 850px;
             margin-top: 1rem;
@@ -718,9 +718,9 @@
                 </p>
             </div>
 
-            <button onclick="switchView('case_select')" class="btn btn-amber pulse-btn" style="padding: 1rem 2.5rem; font-size: 1.1rem; border-radius: 14px;">
-                <span>🚀 JETZT STARTEN (MULAI DETEKTIF)</span>
-            </button>
+            <button onclick="switchView('case_select')" class="btn btn-amber" style="background-color: #5c0000 !important; color: #ffffff !important; border-radius: 14px !important; padding: 1rem 2rem; font-weight: bold; border: none; cursor: pointer; width: 100%;">
+    🚀 JETZT STARTEN (MULAI DETEKTIF)
+</button>
 
             <div class="feature-cards">
                 <div class="feature-card">
@@ -1329,33 +1329,33 @@
 
             if (gameState.currentStep === 0) {
                 // INTRO SCREEN FOR SELECTED CASE
-                windowEl.innerHTML = `
-                    <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.25rem; flex: 1; padding: 1rem 0;">
-                        <div style="width: 70px; height: 70px; border-radius: 20px; background: linear-gradient(135deg, var(--amber-hover), var(--amber-accent)); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: #0b1120; box-shadow: 0 10px 25px rgba(245,158,11,0.3);">
-                            🕵️
-                        </div>
+windowEl.innerHTML = `
+    <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.25rem; flex: 1; padding: 1rem 0;">
+        <div style="width: 70px; height: 70px; border-radius: 20px; background: #5c0000; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: #ffffff; box-shadow: 0 10px 25px rgba(92, 0, 0, 0.4);">
+            🕵️
+        </div>
 
-                        <div>
-                            <span class="badge-ict" style="font-size: 0.75rem; padding: 0.25rem 0.75rem;">${currentCase.number} • ${currentCase.level}</span>
-                            <h2 style="font-size: 1.75rem; font-weight: 800; color: #f8fafc; margin-top: 0.5rem;">
-                                ${currentCase.title.toUpperCase()}
-                            </h2>
-                            <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 500px; margin: 0.5rem auto 0; line-height: 1.5;">
-                                ${currentCase.desc}
-                            </p>
-                        </div>
+        <div>
+            <span class="badge-ict" style="font-size: 0.75rem; padding: 0.25rem 0.75rem; background-color: #5c0000; color: #ffffff; border-radius: 20px; display: inline-block;">${currentCase.number} • ${currentCase.level}</span>
+            <h2 style="font-size: 1.75rem; font-weight: 800; color: #f8fafc; margin-top: 0.5rem;">
+                ${currentCase.title.toUpperCase()}
+            </h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 500px; margin: 0.5rem auto 0; line-height: 1.5;">
+                ${currentCase.desc}
+            </p>
+        </div>
 
-                        <div style="background: rgba(15,23,42,0.8); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem; text-align: left; max-width: 500px; width: 100%; font-size: 0.75rem; color: #cbd5e1; display: flex; flex-direction: column; gap: 0.4rem;">
-                            <div style="color: var(--amber-accent); font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 0.3rem; margin-bottom: 0.2rem;">📋 ATURAN DETEKTIF / RULES:</div>
-                            <div>1. Baca statement Bahasa Jerman (Leseverstehen) dari 4 tersangka.</div>
-                            <div>2. Jawab pertanyaan pemahaman untuk membuka <strong>Clue / Hinweis</strong>.</div>
-                            <div>3. Bandingkan alibi! Siapa yang GELOGEN / berbohong?</div>
-                        </div>
+        <div style="background: rgba(15,23,42,0.8); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem; text-align: left; max-width: 500px; width: 100%; font-size: 0.75rem; color: #cbd5e1; display: flex; flex-direction: column; gap: 0.4rem;">
+            <div style="color: #ffffff; font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 0.3rem; margin-bottom: 0.2rem;">📋 ATURAN DETEKTIF / RULES:</div>
+            <div>1. Baca statement Bahasa Jerman (Leseverstehen) dari 4 tersangka.</div>
+            <div>2. Jawab pertanyaan pemahaman untuk membuka <strong>Clue / Hinweis</strong>.</div>
+            <div>3. Bandingkan alibi! Siapa yang GELOGEN / berbohong?</div>
+        </div>
 
-                        <button onclick="nextStep()" class="btn btn-amber" style="padding: 0.85rem 2rem; font-size: 0.9rem;">
-                            <span>Ermittlung Starten (Mulai Penyelidikan)</span> ➔
-                        </button>
-                    </div>
+        <button onclick="nextStep()" class="btn" style="background-color: #5c0000; color: #ffffff; padding: 0.85rem 2rem; font-size: 0.9rem; border: none; cursor: pointer; border-radius: 8px;">
+            <span>Ermittlung Starten (Mulai Penyelidikan)</span> ➔
+        </button>
+    </div>
                 `;
             } else if (gameState.currentStep >= 1 && gameState.currentStep <= suspects.length) {
                 // INVESTIGATION
