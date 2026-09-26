@@ -677,6 +677,19 @@ div[style*="border-color: #f59e0b"] {
         max-width: 100% !important;
     }
 }
+      /* Jika kartu tersangka ganjil dan merupakan kartu terakhir, buat posisinya ke tengah */
+.suspect-card:last-child:nth-child(odd) {
+    grid-column: 1 / -1; /* Membentang penuh dari kiri ke kanan */
+    justify-self: center; /* Membuat posisinya berada di tengah */
+    width: 50%; /* Sesuaikan lebarnya agar sama rapi dengan kartu lainnya */
+}
+
+/* Penyesuaian agar di layar HP/Mobile lebarnya tetap pas */
+@media (max-width: 600px) {
+    .suspect-card:last-child:nth-child(odd) {
+        width: 50%; /* Kalau di HP biasa, lebarnya menyesuaikan kartu lain */
+    }
+}
     </style>
 </head>
 <body>
@@ -784,9 +797,15 @@ div[style*="border-color: #f59e0b"] {
         
         <!-- Wadah Teks Cerita Utama -->
         <div id="storyTextContent" style="font-size: 0.95rem; line-height: 1.6; text-align: left; margin-bottom: 2rem; background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px;">
-            <p>Smartphone milik Prof. Schneider mendadak hilang di kampus pada pukul 10:00 Uhr pagi! Siapa pelakunya?</p>
-            <p>Lies die Aussagen der Verdächtigen aufmerksam durch, um den Täter zu entlarven.</p>
-        </div>
+            <p>Am Samstagabend macht Emilia eine kleine Party bei sich zu Hause. Sie kocht
+eine Suppe für ihre Gäste. Vor dem Essen sind drei Personen in der Küche:
+Luisa, Karl und Sophia. Luisa stellt die Teller auf den Tisch, obwohl die Suppe
+noch im heißen Topf auf dem Herd steht und Emilia sie erst später selbst
+ausschenkt. Karl holt Wasser aus der Küche. Sophia bringt Brot. Nach dem
+Essen fühlt sich Emilia plötzlich sehr schlecht und muss ins Krankenhaus. Die
+Polizei stellt fest: Das Gift war nur auf Emilias Teller, während die Suppe im Topf
+völlig sauber war. Die Polizei kommt und spricht mit den drei Personen.</p>
+            </div>
 
         <!-- Navigasi Tombol Zurück dan Weiter -->
         <div style="display: flex; justify-content: space-between; gap: 1rem;">
@@ -957,13 +976,13 @@ function goBackFromStory() {
             {
                 id: 'case1',
                 number: 'Fall #1',
-                title: 'Das verschwundene Handy',
+                title: 'Das vergiftete Essen',
                 location: 'UNIVERSITÄT CAMPUS',
                 level: 'Niveau A1',
                 levelTag: 'level-a1',
                 desc: 'Smartphone milik Prof. Schneider mendadak hilang di kampus pada pukul 10:00 Uhr pagi! Siapa pelakunya?',
                 vocabList: [
-                    { de: 'das verschwundene Handy', id: 'Ponsel / HP yang hilang' },
+                    { de: 'Das vergiftete Essen', id: 'Ponsel / HP yang hilang' },
                     { de: 'die Bibliothek', id: 'Perpustakaan' },
                     { de: 'die Mensa', id: 'Kantin kampus' },
                     { de: 'das Sprachlabor', id: 'Laboratorium bahasa' },
@@ -974,18 +993,18 @@ function goBackFromStory() {
                 ],
                 suspects: [
                     {
-                        id: 'anna',
-                        name: 'Anna',
+                        id: 'luisa',
+                        name: 'Luisa',
                         avatar: '👩‍⚕️',
                         major: 'Medizin',
-                        location: 'Bibliothek',
-                        time: '10:00 Uhr',
-                        statement: 'Anna war um 10:00 Uhr in der Bibliothek. Sie sagt: "Ich war von 09:30 bis 11:00 Uhr in der Bibliothek und habe ein Buch gelesen."',
-                        question: 'Wo war Anna laut ihrer Aussage um 10:00 Uhr?',
+                        location: 'Küche',
+                        statement: 'Luisa sagt: „Ich war nur kurz in der Küche. Ich habe die Teller auf den Tisch gestellt. Ich habe extra einen ganz bestimmten Teller nach vorne gestellt, deshalb Emilia sich als erste bedient. Danach bin ich sofort ins Wohnzimmer gegangen."',
+                        question: 'Was macht Luisa in der Küche?',
                         options: [
-                            { text: 'In der Mensa', correct: false },
-                            { text: 'In der Bibliothek', correct: true },
-                            { text: 'Im Café', correct: false }
+                            { text: 'Sie holt Wasser.', correct: false },
+                            { text: 'Sie stellt die Teller auf den Tisch.', correct: true },
+                            { text: 'Sie bringt Brot.', correct: false },
+                            { text: 'Sie kocht die Suppe.', correct: false }
                         ],
                         explanation: 'Richtig! Anna war laut ihrer Aussage in der Bibliothek.',
                         clueText: '🔍 Bibliothekar-Aussage: Der Bibliothekar bestätigt, dass Anna wirklich von 09:30 bis 11:00 Uhr ruhig gelernt hat. (Alibi!)',
@@ -1027,24 +1046,7 @@ function goBackFromStory() {
                         clueText: '🔍 Lehrerin-Aussage: Die Deutschlehrerin bestätigt, dass Mia die ganze Zeit anwesend war. (Alibi!)',
                         innocent: true
                     },
-                    {
-                        id: 'tom',
-                        name: 'Tom',
-                        avatar: '👨‍🏈',
-                        major: 'Sport',
-                        location: 'Sporthalle',
-                        time: '10:00 Uhr',
-                        statement: 'Tom sagt: "Ich war von 09:00 bis 10:30 Uhr in der Sporthalle und habe Basketball trainiert."',
-                        question: 'Wie lange war Tom in der Sporthalle?',
-                        options: [
-                            { text: 'Von 10:00 bis 12:00 Uhr', correct: false },
-                            { text: 'Von 09:00 bis 10:30 Uhr', correct: true },
-                            { text: 'Nur 10 Minuten', correct: false }
-                        ],
-                        explanation: 'Richtig! Tom war von 09:00 bis 10:30 Uhr in der Sporthalle.',
-                        clueText: '🔍 Trainer-Aussage: Der Basketballtrainer hat bestätigt, dass Tom das gesamte Training absolviert hat. (Alibi!)',
-                        innocent: true
-                    }
+                    
                 ]
             },
             {
@@ -1466,8 +1468,7 @@ windowEl.innerHTML = `
     <span class="badge-ict" style="background-color: #5c0000; color: #ffff;">VERDÄCHTIGER #${gameState.currentStep} / ${suspects.length}</span>
     <h3 style="font-size: 1.1rem; font-weight: 700; color: #f8fafc;">${currentSuspect.name} (${currentSuspect.major})</h3>
 </div>
-                            <span style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">Uhrzeit: <strong style="color: var(--amber-accent);">${currentSuspect.time}</strong></span>
-                        </div>
+                            </div>
 
                         <div class="statement-box">
                             <div class="statement-avatar">${currentSuspect.avatar}</div>
