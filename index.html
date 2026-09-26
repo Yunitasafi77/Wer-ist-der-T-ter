@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wer ist der Täter? - Digital Mystery Game</title>
-    <title>Wer ist der Täter? - Digital Mystery Game</title>
 
     <!-- Google Fonts & Tone.js Audio Library -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -791,32 +790,22 @@ div[style*="border-color: #f59e0b"] {
             </div>
         </section>
       <!-- VIEW BARU: STORY VIEW -->
-<section id="viewStory" style="display: none; padding: 1.5rem; color: #ffffff;">
+<section id="viewStory" class="hidden" style="padding: 1.5rem; color: #ffffff;">
     <div class="glass-panel" style="max-width: 600px; margin: 0 auto; padding: 1.5rem; text-align: center;">
         <h2 style="color: #ff4d4d; margin-bottom: 1rem;">📜 Geschichte des Falls</h2>
         
-        <!-- Wadah Teks Cerita Utama -->
+        <!-- WADAH INI WAJIB ADA AGAR TEKS CERITA MUNCUL -->
         <div id="storyTextContent" style="font-size: 0.95rem; line-height: 1.6; text-align: left; margin-bottom: 2rem; background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px;">
-            <p>Am Samstagabend macht Emilia eine kleine Party bei sich zu Hause. Sie kocht
-eine Suppe für ihre Gäste. Vor dem Essen sind drei Personen in der Küche:
-Luisa, Karl und Sophia. Luisa stellt die Teller auf den Tisch, obwohl die Suppe
-noch im heißen Topf auf dem Herd steht und Emilia sie erst später selbst
-ausschenkt. Karl holt Wasser aus der Küche. Sophia bringt Brot. Nach dem
-Essen fühlt sich Emilia plötzlich sehr schlecht und muss ins Krankenhaus. Die
-Polizei stellt fest: Das Gift war nur auf Emilias Teller, während die Suppe im Topf
-völlig sauber war. Die Polizei kommt und spricht mit den drei Personen.</p>
-            </div>
+            <!-- Teks cerita akan otomatis dimasukkan ke sini oleh JavaScript -->
+        </div>
 
-        <!-- Navigasi Tombol Zurück dan Weiter -->
+        <!-- Tombol Navigasi -->
         <div style="display: flex; justify-content: space-between; gap: 1rem;">
-            <!-- Tombol Zurück (Di-disable / tidak bisa diklik secara bawaan) -->
-            <button onclick="prevStep()" class="btn">
-    ← Zurück
-</button>
-
-            <!-- Tombol Weiter (Untuk masuk ke gameplay) -->
-            <button onclick="startInvestigationFromStory()" class="btn" style="background: #5c0000; color: #ffffff; flex: 1; font-weight: bold;">
-                Weiter →
+            <button id="btnStoryBack" onclick="switchView('gameplay')" class="btn" style="background: #333333; color: #888888; cursor: not-allowed;" disabled>
+                ← Zurück
+            </button>
+            <button onclick="startInvestigationFromStory()" class="btn btn-amber" style="background: #a30000; color: #ffffff;">
+                Ermittlung Starten →
             </button>
         </div>
     </div>
@@ -913,42 +902,53 @@ let hasStartedGameplay = false;
 
 // 1. Fungsi untuk membuka halaman cerita
 function openStoryView() {
-    playSound('click'); // <-- Tambahkan baris ini
-    
-    // ... Sisa kode openStoryView kamu di bawahnya ...
-    if (document.getElementById('viewIntro')) document.getElementById('viewIntro').style.display = 'none';
-    if (document.getElementById('viewGameplay')) document.getElementById('viewGameplay').style.display = 'none';
-    document.getElementById('viewStory').style.display = 'block';
+    playSound('click'); 
 
-    // Cek status tombol Zurück: HANYA aktif jika sudah pernah masuk gameplay
+    // Ambil kasus aktif
+    const currentCase = getActiveCase();
+    const storyContainer = document.getElementById('storyTextContent');
+
+    console.log("Active Case ID:", gameState.activeCaseId);
+    console.log("Current Case Object:", currentCase);
+
+    if (storyContainer) {
+        if (currentCase && currentCase.story) {
+            storyContainer.innerHTML = currentCase.story;
+        } else {
+            storyContainer.innerHTML = '<p>Cerita belum tersedia untuk kasus ini.</p>';
+        }
+    }
+
+    switchView('story');
+
+    // Atur tombol Zurück
     const backBtn = document.getElementById('btnStoryBack');
-    if (hasStartedGameplay) {
-        backBtn.disabled = false;
-        backBtn.style.background = '#5c0000';
-        backBtn.style.color = '#ffffff';
-        backBtn.style.cursor = 'pointer';
-    } else {
-        backBtn.disabled = true;
-        backBtn.style.background = '#333333';
-        backBtn.style.color = '#888888';
-        backBtn.style.cursor = 'not-allowed';
+    if (backBtn) {
+        if (hasStartedGameplay) {
+            backBtn.disabled = false;
+            backBtn.style.background = '#5c0000';
+            backBtn.style.color = '#ffffff';
+            backBtn.style.cursor = 'pointer';
+        } else {
+            backBtn.disabled = true;
+            backBtn.style.background = '#333333';
+            backBtn.style.color = '#888888';
+            backBtn.style.cursor = 'not-allowed';
+        }
     }
 }
 
 // 2. Fungsi saat tombol "Weiter →" diklik (Lanjut ke Gameplay)
 function startInvestigationFromStory() {
-  playSound('click');
+    playSound('click');
     hasStartedGameplay = true;
     
-    // Sembunyikan Story View & Tampilkan Gameplay
-    document.getElementById('viewStory').style.display = 'none';
-    document.getElementById('viewGameplay').style.display = 'flex';
+    // Pindah ke tampilan gameplay
+    switchView('gameplay');
     
-    // Jika baru pertama kali mulai (masih di step 0/belum set), set ke step 1 (Anna)
     if (!gameState.currentStep || gameState.currentStep < 1) {
         gameState.currentStep = 1;
     }
-    
     renderCurrentStep();
 }
 
@@ -972,8 +972,10 @@ function goBackFromStory() {
         ];
 
         // --- 10 CASES DATABASE ---
+      
         const casesDatabase = [
             {
+                
                 id: 'case1',
                 number: 'Fall #1',
                 title: 'Das vergiftete Essen',
@@ -981,22 +983,25 @@ function goBackFromStory() {
                 level: 'Niveau A1',
                 levelTag: 'level-a1',
                 desc: 'Smartphone milik Prof. Schneider mendadak hilang di kampus pada pukul 10:00 Uhr pagi! Siapa pelakunya?',
-                vocabList: [
-                    { de: 'Das vergiftete Essen', id: 'Ponsel / HP yang hilang' },
-                    { de: 'die Bibliothek', id: 'Perpustakaan' },
-                    { de: 'die Mensa', id: 'Kantin kampus' },
-                    { de: 'das Sprachlabor', id: 'Laboratorium bahasa' },
-                    { de: 'die Sporthalle', id: 'Gedung / Aula olahraga' },
-                    { de: 'geschlossen', id: 'Tutup' },
-                    { de: 'geöffnet', id: 'Buka' },
-                    { de: 'die Uhrzeit (um 10:00 Uhr)', id: 'Waktu / Jam (pada pukul 10:00)' }
-                ],
+                story: '<p> Am Samstagabend macht Emilia eine kleine Party bei sich zu Hause. Sie kocht eine Suppe für ihre Gäste. Vor dem Essen sind drei Personen in der Küche: Luisa, Karl und Sophia. Luisa stellt die Teller auf den Tisch. Die Suppe steht noch im heißen Topf auf dem Herd. Karl holt Wasser aus der Küche. Sophia bringt Brot. Nach dem Essen fühlt sich Emilia plötzlich sehr schlecht und muss ins Krankenhaus. Die Suppe im Topf war nicht giftig. Die Polizei kommt und spricht mit den drei Personen. </p>',           
+              vocabList: [
+    { de: 'die Party', id: 'Pesta' },
+    { de: 'die Suppe kochen', id: 'Memasak sup' },
+    { de: 'der Teller', id: 'Piring' },
+    { de: 'der Topf', id: 'Panci' },
+    { de: 'der Herd', id: 'Kompor' },
+    { de: 'Wasser holen', id: 'Mengambil air' },
+    { de: 'das Brot bringen', id: 'Membawa roti' },
+    { de: 'sich schlecht fühlen', id: 'Merasa tidak enak badan' },
+    { de: 'das Krankenhaus', id: 'Rumah sakit' },
+    { de: 'der Hauptverdächtige', id: 'Tersangka utama' }
+],
                 suspects: [
                     {
                         id: 'luisa',
                         name: 'Luisa',
-                        avatar: '👩‍⚕️',
-                        major: 'Medizin',
+                        avatar: '👩‍⚕️' ,
+                        major: ' peran',
                         location: 'Küche',
                         statement: 'Luisa sagt: „Ich war nur kurz in der Küche. Ich habe die Teller auf den Tisch gestellt. Ich habe extra einen ganz bestimmten Teller nach vorne gestellt, deshalb Emilia sich als erste bedient. Danach bin ich sofort ins Wohnzimmer gegangen."',
                         question: 'Was macht Luisa in der Küche?',
@@ -1006,145 +1011,752 @@ function goBackFromStory() {
                             { text: 'Sie bringt Brot.', correct: false },
                             { text: 'Sie kocht die Suppe.', correct: false }
                         ],
-                        explanation: 'Richtig! Anna war laut ihrer Aussage in der Bibliothek.',
-                        clueText: '🔍 Bibliothekar-Aussage: Der Bibliothekar bestätigt, dass Anna wirklich von 09:30 bis 11:00 Uhr ruhig gelernt hat. (Alibi!)',
-                        innocent: true
-                    },
-                    {
-                        id: 'lukas',
-                        name: 'Lukas',
-                        avatar: '👨‍💻',
-                        major: 'Informatik',
-                        location: 'Mensa',
-                        time: '10:00 Uhr',
-                        statement: 'Lukas sagt: "Ich war genau um 10:00 Uhr in der Mensa und habe eine warme Pizza gegessen. Es war sehr lecker!"',
-                        question: 'Was hat Lukas um 10:00 Uhr in der Mensa angeblich gemacht?',
-                        options: [
-                            { text: 'Basketball gespielt', correct: false },
-                            { text: 'Ein Buch gelesen', correct: false },
-                            { text: 'Pizza gegessen', correct: true }
-                        ],
-                        explanation: 'Richtig! Lukas behauptet, Pizza in der Mensa gegessen zu haben.',
-                        clueText: '🚨 WICHTIGER HINWEIS: Der Mensa-Koch sagt: "Die Mensa öffnet erst um 11:30 Uhr! Um 10:00 Uhr war die Mensa GESCHLOSSEN!" (GELOGEN!)',
+                        explanation: 'Richtig!',
+                        clueText: '🔍 Die Polizei sieht drei Gläser auf dem Tisch. Karl kommt in die Küche und holt Wasser. (Alibi!)',
                         innocent: false
                     },
                     {
-                        id: 'mia',
-                        name: 'Mia',
-                        avatar: '👩‍🎨',
-                        major: 'Kunst',
-                        location: 'Sprachlabor',
-                        time: '10:00 Uhr',
-                        statement: 'Mia sagt: "Ich hatte von 09:45 bis 10:45 Uhr Unterricht im Sprachlabor. Ich habe Deutsch gelernt."',
-                        question: 'Welches Fach hat Mia um 10:00 Uhr gelernt?',
+                        id: 'karl',
+                        name: 'Karl',
+                        avatar: '👨 ',
+                        major: ' peran ',
+                        location: 'Küche',
+                        statement: ' Karl sagt: „Ich war in der Küche, weil ich Wasser wollte. Ich habe ein Glas genommen und bin danach ins Wohnzimmer gegangen. Ich habe nichts gegessen"',
+                        question: 'Was möchte Karl?',
                         options: [
-                            { text: 'Deutsch', correct: true },
-                            { text: 'Englisch', correct: false },
-                            { text: 'Mathematik', correct: false }
+                            { text: 'Wasser', correct: true },
+                            { text: 'Suppe', correct: false },
+                            { text: 'Brot', correct: false },
+                           { text: ' Kaffee', correct : false } ,
                         ],
-                        explanation: 'Richtig! Mia war im Sprachlabor und hat Deutsch gelernt.',
-                        clueText: '🔍 Lehrerin-Aussage: Die Deutschlehrerin bestätigt, dass Mia die ganze Zeit anwesend war. (Alibi!)',
+                        explanation: 'Richtig!',
+                        clueText: '🔍 Karl hat nur Wasser getrunken. Auf dem Tisch liegt auch frisches Brot für alle Gäste. (Alibi!)',
                         innocent: true
                     },
-                    
+                    {
+                        id: 'sophia',
+                        name: 'Sophia',
+                        avatar: '👩',
+                        major: 'Peran',
+                        location: 'Küche',
+                        statement: 'Sophia sagt: „Ich habe Brot in die Küche gebracht. Danach bin ich zu den anderen Gästen gegangen. Ich habe die Suppe nicht gegessen.“',
+                        question: 'Was bringt Sophia in die Küche?',
+                        options: [
+                            { text: 'Wasser', correct: false },
+                            { text: 'Teller', correct: false },
+                            { text: 'Brot', correct: true },
+                          { text: 'Kaffee', correct: false},
+                        ],
+                        explanation: 'Richtig!',
+                        clueText: '🔍 Das Gift war nicht im Brot und nicht im Wasser. Die Polizei weiß jetzt: Das Gift war nur auf dem einen Teller von Emilia. (Alibi!)',
+                        innocent: true
+                    }
                 ]
             },
             {
                 id: 'case2',
                 number: 'Fall #2',
-                title: 'Der Diebstahl im Kunstmuseum',
-                location: 'STADT MANTUA',
+                title: 'Der verschwundene Hund',
+                location: 'Im Garten',
                 level: 'Niveau A1',
-                levelTag: 'level-a2',
-                desc: 'Lukisan abstrak berharga bernilai tinggi hilang dari galeri seni pada pukul 14:00 Uhr saat pemeliharaan sistem museum.',
+                levelTag: 'level-a1',
+                desc: 'An einem sonnigen Sonntag ist der kleine weiße Hund Bello weg. Frau Müller findet nur einen Brief auf dem Tisch. Wer hat Bello gestohlen?',
+                story: '<p>Frau Müller hat einen kleinen, weißen Hund. Er heißt Bello. Am Sonntag um 10:00 Uhr ist Frau Müller im Garten. Bello spielt mit einem Ball. Frau Müller geht kurz in die Küche und holt einen Tee. Als sie zurück in den Garten kommt, ist Bello weg! Die Gartentür ist offen. Frau Müller findet einen Zettel auf dem Tisch: „Ich habe deinen Hund. Gib mir 100 Euro oder du siehst Bello nie wieder!“ Frau Müller weint und ruft sofort die Polizei. Inspektor Weber kommt. Er spricht mit drei Nachbarn.</p>',
                 vocabList: [
-                    { de: 'das Kunstmuseum', id: 'Museum seni' },
-                    { de: 'das Gemälde / Kunstwerk', id: 'Lukisan / Karya seni' },
-                    { de: 'wertvoll', id: 'Berharga / Bernilai tinggi' },
-                    { de: 'der Raum / die Galerie', id: 'Ruangan / Galeri' },
-                    { de: 'die Bewachung', id: 'Penjagaan / Pengawalan' }
+    { de: 'der Hund', id: 'Anjing' },
+    { de: 'der Garten', id: 'Kebun/halaman' },
+    { de: 'spielen', id: 'Bermain' },
+    { de: 'die Gartentür', id: 'Pintu halaman' },
+    { de: 'der Zettel', id: 'Secarik kertas/catatan' },
+    { de: 'weinen', id: 'Menangis' },
+    { de: 'die Polizei rufen', id: 'Memanggil polisi' },
+    { de: 'der Inspektor', id: 'Inspektur' },
+    { de: 'die Jacke', id: 'Jaket' },
+    { de: 'der Entführer', id: 'Penculik' }
+],
+                suspects: [
+                  {
+                        id: 'herr Schulze',
+                        name: 'Herr Schulze',
+                        avatar: '👨 ',
+                        major: ' peran ',
+                        location: 'Im Garten',
+                        statement: ' Herr Schulze sagt: „Ich habe nichts gesehen. Ich habe von 9:30 Uhr bis 10:30 Uhr in meiner Küche Frühstück gemacht. Ich liebe Hunde!“',
+                        question: 'Was hat Herr Schulze gemacht?',
+                        options: [
+                            { text: 'Er hat im Garten gespielt', correct: false },
+                            { text: 'Er hat in der Küche Frühstück gemacht', correct: true },
+                            { text: 'Er hat einen Brief geschrieben', correct: false },
+                           { text: ' Er ist spazieren gegangen', correct : false } ,
+                        ],
+                        explanation: 'Richtig!',
+                        clueText: '🔍 Herr Schulze war die ganze Zeit im Haus. Aber die Nachbarin Frau Becker hat draußen etwas gesehen. (Alibi!)',
+                        innocent: true
+                  },
+                  { 
+                        id: 'frau Becker',
+                        name: 'Frau Becker',
+                        avatar: '👩 ',
+                        major: ' peran ',
+                        location: 'Im Garten',
+                        statement: 'Frau Becker sagt: „Ich war im Garten und habe Blumen gegossen. Um 10:05 Uhr habe ich einen Mann gesehen. Er trägt eine schwarze Jacke und hat eine große Tasche.',
+                        question: 'Was hat der Mann getragen?',
+                        options: [
+                            { text: 'Eine weiße Hose', correct: false },
+                            { text: 'Eine Rote Mütze', correct: false },
+                            { text: 'Eine schwarze Jacke und eine große Tasche', correct: true },
+                           { text: ' Einen gelben Pullover', correct : false } ,
+                        ],
+                        explanation: 'Richtig!',
+                        clueText: '🔍 Frau Becker kennt die schwarze Jacke. Jetzt geht Inspektor Weber zu Lukas nach Hause . (Alibi!)',
+                        innocent: true
+                  },
+                  { 
+                        id: 'lukas',
+                        name: 'Lukas',
+                        avatar: '👨‍🦱 ',
+                        major: ' der Junge ',
+                        location: 'Im Garten',
+                        statement: ' Lukas sagt: „Ich habe im Wohnzimmer Musik gehört. Ich kenne Bello gut. Ich war heute nicht draußen.“ Aber Inspektor Weber sieht weiße Hundehaare an Lukas schwarzer Jacke',
+                        question: 'Wo war Lukas laut seiner Aussage?',
+                        options: [
+                            { text: 'Im Wohnzimmer', correct: true },
+                            { text: 'Im Garten', correct: false },
+                            { text: 'In der Schule', correct: false },
+                           { text: ' Im Supermarkt', correct : false } ,
+                        ],
+                        explanation: 'Richtig!',
+                        clueText: '🔍 Lukas trägt eine schwarze Jacke. Die weißen Hundehaare zeigen: Er hat Bello heute berührt! (Alibi!)',
+                        innocent: false
+                  }
                 ],
-                suspects: []
             },
             {
                 id: 'case3',
                 number: 'Fall #3',
-                title: 'Das Geheimnis im Chemielabor',
-                location: 'FORSCHUNGSZENTRUM',
+                title: 'Der Mord im Hotel',
+                location: 'Hotel Sonnenhof',
                 level: 'Niveau A1',
-                levelTag: 'level-a2',
-                desc: 'Formula eksperimen penting mendadak terhapus dari komputer laboratorium utama.',
-                suspects: []
+                levelTag: 'level-a1',
+                desc: ' Herr Braun wird am Freitagabend tot in seinem Hotelzimmer gefunden. Vor seinem Tod hat er mit drei Personen gesprochen. Die Polizei untersucht, was die drei Personen an diesem Abend gemacht haben.' ,
+                story: '<p>Am Freitagabend wird Herr Braun tot in seinem Hotelzimmer gefunden. Er liegt neben seinem Bett. Auf dem Tisch steht ein Glas Wasser. Vor seinem Tod hat Herr Braun mit drei Personen gesprochen: Lily, Jack und Noah. Die Polizei fragt alle drei Personen.</p>',
+                vocabList: [
+    { de: 'das Hotelzimmer', id: 'Kamar hotel' },
+    { de: 'tot sein', id: 'Sudah meninggal' },
+    { de: 'das Glas Wasser', id: 'Segelas air' },
+    { de: 'der Kellner', id: 'Pelayan' },
+    { de: 'das Restaurant', id: 'Restoran' },
+    { de: 'die Kamera', id: 'Kamera' },
+    { de: 'die Fingerabdrücke', id: 'Sidik jari' },
+    { de: 'der Durst', id: 'Rasa haus' },
+    { de: 'bestätigen', id: 'Mengonfirmasi' },
+    { de: 'der Täter', id: 'Pelaku' }
+],
+              suspects:
+                  [
+                    { 
+                        id: 'lily',
+                        name: 'Lily',
+                        avatar: '👩 ',
+                        major: ' Hotelgast ',
+                        location: 'Hotel Sonnenhof',
+                        statement: ' Lily sagt: „Ich war um 19 Uhr bei Herrn Braun. Wir haben kurz gesprochen. Danach bin ich ins Restaurant gegangen. Um 19:20 Uhr hat ein Kellner mich dort gesehen. Ich habe Herrn Braun nicht getötet.“',
+                        question: 'Was macht Lily nach dem Gespräch mit dem Herrn Braun?',
+                        options: [
+                            { text: 'Sie geht zurück in ihr Zimmer', correct: false },
+                            { text: 'Sie geht zuerst ins Restaurant', correct: true },
+                            { text: 'Sie bleibt bei Herrn Braun', correct: false },
+                           { text: ' Auf der Straße', correct : false } ,
+                        ],
+                        explanation: 'Richtig!',
+                        clueText: '🔍 Der Kellner bestätigt, dass Emma um 19:20 Uhr im Restaurant war. Emmas Alibi ist bestätigt. (Alibi!)',
+                        innocent: true
+                    },
+                    { 
+                        id: 'jack',
+                        name: 'Jack',
+                        avatar: '👨 ',
+                        major: ' Hotelgast ',
+                        location: 'Hotel Sonnenhof',
+                        statement: ' Jack sagt: „Ich war am Abend in meinem Zimmer. Ich habe ein Buch gelesen. Um 19:30 Uhr bin ich kurz zu Herrn Brauns Zimmer gegangen, aber er war nicht dort. Danach bin ich wieder in mein Zimmer gegangen.“',
+                        question: 'Was macht Jack, nachdem er sein Buch gelesen hat?',
+                        options: [
+                            { text: 'Er geht ins Restaurant', correct: false },
+                            { text: 'Er geht nach Hause', correct: false },
+                            { text: 'Er geht zu Herrn Brauns Zimmer', correct: true },
+                           { text: ' Er trifft Emma', correct : false } ,
+                        ],
+                        explanation: 'Richtig!',
+                        clueText: '🔍 Eine Kamera zeigt Jonas um 19:30 Uhr vor Herrn Brauns Zimmer. Jonas war wirklich dort. (Alibi!)',
+                        innocent: true
+                    },
+                    {
+                        id: 'noah',
+                        name: 'Noah',
+                        avatar: '👨 ',
+                        major: ' Hotelmitarbeiter ',
+                        location: 'Hoten Sonnenhof',
+                        statement: ' Noah sagt: „Ich war um 19 Uhr bei Herrn Braun. Er hatte Durst, deshalb habe ich ihm eine Flasche Wasser gebracht. Danach bin ich gegangen und habe ihn nicht mehr gesehen.“',
+                        question: 'Warum bringt Noah Herrn Braun eine Flasche Wasser?',
+                        options: [
+                            { text: 'Weil Herrn Braun Durst hat', correct: true },
+                            { text: 'Weil Paul dort essen möchte', correct: false },
+                            { text: 'Weil Herrn Braun ein Buch braucht', correct: false },
+                           { text: ' Weil Paul im Hotel arbeitet', correct : false } ,
+                        ],
+                        explanation: 'Richtig!',
+                        clueText: '🔍 Die Polizei findet Noahs Fingerabdrücke auf der Wasserflasche. Paul hatte direkten Kontakt mit der Flasche. (Alibi!)',
+                        innocent: false
+                    },
+                  
+                ]
             },
             {
                 id: 'case4',
                 number: 'Fall #4',
-                title: 'Das verschollene Fahrrad',
-                location: 'HAUPTBAHNHOF',
+                title: 'Der kaputte Fernseher',
+                location: 'Im Wohnzimmer',
                 level: 'Niveau A1',
                 levelTag: 'level-a1',
-                desc: 'Sepeda balap kesayangan milik mahasiswa pertukaran hilang di depan stasiun kereta jam 08:00 Uhr.',
-                suspects: []
+                desc: 'Familie Weber macht einen gemütlichen Filmabend. Doch plötzlich geht der Fernseher kaputt. Wer hat den Fernseher kaputt gemacht? War es Selina, Tobias oder Clara?',
+                story: '<p>Am Samstagabend macht Familie Weber einen Filmabend. Alle sitzen im Wohnzimmer und sehen einen Film. Nach einer Stunde geht Frau Weber kurz in die Küche, um Popcorn zu holen. Als sie zurückkommt, ist der Fernseher plötzlich kaputt. Der Bildschirm ist schwarz und der Film läuft nicht mehr. Drei Personen waren im Wohnzimmer: Selina, Tobias und Clara. Die Polizei kommt und spricht mit den drei Personen.</p>',
+                vocabList: [
+    { de: 'der Filmabend', id: 'Malam nonton film' },
+    { de: 'das Wohnzimmer', id: 'Ruang tamu' },
+    { de: 'kaputt', id: 'Rusak' },
+    { de: 'der Bildschirm', id: 'Layar' },
+    { de: 'das Sofa', id: 'Sofa' },
+    { de: 'eine Nachricht schreiben', id: 'Menulis pesan' },
+    { de: 'das Handy', id: 'Ponsel' },
+    { de: 'das Schlafzimmer', id: 'Kamar tidur' },
+    { de: 'die Jacke holen', id: 'Mengambil jaket' },
+    { de: 'der Hauptverdächtige', id: 'Tersangka utama' }
+],
+              suspects:
+                  [
+                    {
+                        id: 'selina',
+                        name: 'Selina',
+                        avatar: '👩  ',
+                        major: ' Familienmitglied ',
+                        location: 'Im Wohnzimmer',
+                        statement: ' Selina sagt: „Ich sitze auf dem Sofa und sehe den Film. Dann gehe ich in die Küche. Ich möchte etwas trinken. Danach gehe ich wieder ins Wohnzimmer und sitze auf dem Sofa.“',
+                        question: 'Was möchte Selina?',
+                        options: [
+                            { text: 'Popcorn', correct: false },
+                            { text: 'Wasser', correct: true },
+                            { text: 'Kaffee', correct: false },
+                           { text: ' Saft', correct : false } ,
+                        ],
+                        explanation: 'Richtig!',
+                        clueText: '🔍 Selina ist während der Pause in der Küche. Der Fernseher steht im Wohnzimmer und bleibt dort allein. (Alibi!)',
+                        innocent: true
+                       },
+                    { 
+                        id: 'tobias',
+                        name: 'Tobias',
+                        avatar: '👨 ',
+                        major: ' Familienfreund ',
+                        location: 'Im Wohnzimmer',
+                        statement: ' Tobias sagt: „Ich sitze neben dem Fernseher. Der Film ist sehr interessant. Dann nehme ich mein Handy und schreibe eine Nachricht. Danach gehe ich in die Küche.“',
+                        question: 'Wo sitzt Tobias?',
+                        options: [
+                            { text: 'Neben dem Fernsehen', correct: true },
+                            { text: 'Auf dem Sofa', correct: false },
+                            { text: 'In der Küche', correct: false },
+                           { text: ' Neben Anna', correct : false } ,
+                        ],
+                        explanation: 'Richtig!',
+                        clueText: '🔍 Tobias bleibt allein mit dem Fernseher im Wohnzimmer. Er sitzt außerdem direkt neben dem Fernseher. (Alibi!)',
+                        innocent: false
+                    },
+                    { 
+                        id: 'clara',
+                        name: 'Clara',
+                        avatar: '👩 ',
+                        major: ' Familienfreundin ',
+                        location: 'Im Wohnzimmer',
+                        statement: ' Clara sagt: „Ich sitze auf dem Sofa. Ich möchte den Film sehen. Dann gehe ich kurz ins Schlafzimmer, weil ich meine Jacke holen möchte. Danach komme ich wieder ins Wohnzimmer.“',
+                        question: 'Warum geht Clara ins Schlafzimmer?',
+                        options: [
+                            { text: 'Sie möchte Schlafen', correct: false },
+                            { text: 'Sie sucht ihr Handy', correct: false },
+                            { text: 'Sie möchte ihre Jacke holen', correct: true },
+                           { text: ' Sie möchte etwas trinken', correct : false } ,
+                        ],
+                        explanation: 'Richtig!',
+                        clueText: '🔍 Clara kommt zurück und sieht Tobias direkt neben dem Fernseher. Selina ist zu dieser Zeit in der Küche. (Alibi!)',
+                        innocent: true
+                    },
+                     ]
             },
             {
                 id: 'case5',
                 number: 'Fall #5',
-                title: 'Die mysteriöse E-Mail',
-                location: 'ICT CYBER CENTER',
+                title: 'Das Verschwundene Buch',
+                location: 'Im Klassenzimmer',
                 level: 'Niveau A1',
                 levelTag: 'level-a1',
-                desc: 'Email phishing dikirimkan ke seluruh fakultas menggunakan akun administrator palsu.',
-                suspects: []
+                desc: 'Die Lehrerin legt ein neues Buch auf ihren Tisch. Doch nach der Pause ist das Buch plötzlich weg. Wer hat das Buch genommen? War es Lea, Matteo oder Frieda?',
+                story: '<p>Am Montagmorgen legt die Lehrerin ein neues Buch auf ihren Tisch. Vor der Pause sagt sie zu den Schülern, dass niemand das Buch nehmen darf. Dann verlässt sie kurz das Klassenzimmer. Als sie zurückkommt, ist das Buch verschwunden. Lea, Matteo und Frieda waren während der Pause im Klassenzimmer.</p>',
+                vocabList: [
+    { de: 'das Klassenzimmer', id: 'Ruang kelas' },
+    { de: 'die Pause', id: 'Waktu istirahat' },
+    { de: 'verschwinden', id: 'Menghilang' },
+    { de: 'der Kopfhörer', id: 'Headphone' },
+    { de: 'der Stuhl', id: 'Kursi' },
+    { de: 'die Freundin', id: 'Teman perempuan' },
+    { de: 'hinten sitzen', id: 'Duduk di belakang' },
+    { de: 'der Tisch der Lehrerin', id: 'Meja guru' },
+    { de: 'sprechen mit', id: 'Berbicara dengan' },
+    { de: 'der Hauptverdächtige', id: 'Tersangka utama' }
+],
+              suspects: [
+                  { 
+                        id: 'lea',
+                        name: 'Lea',
+                        avatar: '👩 ',
+                        major: ' Schülerin ',
+                        location: 'Im Klassenzimmer',
+                        statement: ' Lea sagt: „Ich sitze am Fenster und lese. Dann gehe ich zur Tür, weil ich draußen meine Freundin sehe. Wir sprechen ein bisschen. Danach gehe ich wieder zum Fenster und lese weiter.“',
+                        question: 'Warum geht Lea zur Tür?',
+                        options: [
+                            { text: 'Sie möchte das Buch holen', correct: false },
+                            { text: 'Sie möchte ihre freundin sehen', correct: true },
+                            { text: ' Sie möchte mit Matteo sprechen', correct: false },
+                           { text: ' Sie möchte zur Lehrerin gehen', correct : false } ,
+                        ],
+                        explanation: 'Richtig!',
+                        clueText: '🔍 Lea ist zuerst am Fenster. Danach geht sie zur Tür und kommt wieder zum Fenster. Sie geht nicht zum Tisch der Lehrerin. (Alibi!)',
+                        innocent: true
+                  },
+                  { 
+                        id: 'matteo',
+                        name: 'Matteo',
+                        avatar: '👦 ',
+                        major: ' Schulassistent ',
+                        location: 'Im Klassenzimmer',
+                        statement: ' Matteo sagt: „Ich möchte Musik hören. Mein Kopfhörer liegt auf dem Tisch. Ich gehe zum Tisch und nehme den Kopfhörer. Danach setze ich mich auf einen Stuhl. Später kommt Frieda zu mir und wir sprechen zusammen.“',
+                        question: 'Was macht Matteo, nachdem er zum Tisch geht?',
+                        options: [
+                            { text: 'Er geht zur Tür', correct: false },
+                            { text: 'Er spricht mit Lea', correct: false },
+                            { text: 'Er nimmt seinen Kopfhörer', correct: true },
+                           { text: ' Er geht nach draußen', correct : false } ,
+                        ],
+                        explanation: 'Richtig!',
+                        clueText: '🔍 Matteo geht zum Tisch der Lehrerin, weil dort sein Kopfhörer liegt. Dort liegt auch das neue Buch. Danach hat er den Kopfhörer in der Hand und setzt sich auf einen Stuhl. (Alibi!)',
+                        innocent: false
+                  },
+                  { 
+                        id: 'frieda',
+                        name: 'Frieda',
+                        avatar: '👧 ',
+                        major: ' Bibliothekshelferin ',
+                        location: 'Im Klassenzimmer',
+                        statement: ' Frieda sagt: „Ich sitze hinten im Klassenzimmer. Später gehe ich zur Tür und treffe dort Matteo. Wir sprechen zusammen. Danach gehe ich wieder nach hinten. Ich gehe nicht zum Tisch der Lehrerin.“',
+                        question: 'Welchen Ort besucht Frieda während der Pause nicht??',
+                        options: [
+                            { text: 'Die Tür', correct: false },
+                            { text: 'Den hinteren Teil des Klassenzimmers', correct: false },
+                            { text: 'Den Platz bei Matteo', correct: false },
+                           { text: ' Den Tisch der Lehrerin', correct : true } ,
+                        ],
+                        explanation: 'Richtig!',
+                        clueText: '🔍 Frieda geht nicht zum Tisch der Lehrerin. Matteo war der Einzige, der zum Tisch der Lehrerin gegangen ist, als das Buch noch dort lag. (Alibi!)',
+                        innocent: true
+                  },
+                ]
             },
             {
                 id: 'case6',
                 number: 'Fall #6',
-                title: 'Der Vorfall in der Kantine',
-                location: 'MENSAGARTEN',
+                title: 'Der Tod im Herrenhaus',
+                location: 'In der Bibliothek eines großen Herrenhauses',
                 level: 'Niveau A2',
-                levelTag: 'level-a1',
-                desc: 'Kotak kue cokelat buatan koki utama mendadak habis diambil seseorang sebelum acara dimulai.',
-                suspects: []
+                levelTag: 'level-a2',
+                desc: 'Ein schönes Abendessen endet traurig: Herr Schneider liegt tot in seiner Bibliothek. Die Uhr ist genau um 21:45 Uhr kaputtgegangen. Wer von den Verdächtigen lügt?',
+                story: '<p>Am Freitagabend gab Herr Schneider ein Abendessen in seinem großen Haus. Gegen 22:00 Uhr hörten die Gäste einen lauten Schrei aus der Bibliothek. Als die Gäste die Tür öffneten, lag Herr Schneider tot auf dem Boden neben seinem Schreibtisch. Die Polizei kam schnell. Ein Täter hat ihn mit einem schweren Messer getötet. Neben der Leiche lag eine kaputte Uhr. Sie ist genau um 21:45 Uhr stehen geblieben. Der Inspektor schloss das Haus und sprach sofort mit den drei Verdächtigen.</p>',
+                vocabList: [
+    { de: 'das Herrenhaus', id: 'Rumah besar/mansion' },
+    { de: 'der Schrei', id: 'Teriakan' },
+    { de: 'die Bibliothek', id: 'Perpustakaan' },
+    { de: 'der Schreibtisch', id: 'Meja kerja' },
+    { de: 'das Messer', id: 'Pisau' },
+    { de: 'die kaputte Uhr', id: 'Jam yang rusak' },
+    { de: 'der Verdächtige', id: 'Tersangka' },
+    { de: 'der Streit (wegen Geld)', id: 'Pertengkaran (soal uang)' },
+    { de: 'der Mörder', id: 'Pembunuh' },
+    { de: 'stehen bleiben', id: 'Berhenti (jam)' }
+],
+                suspects: [
+                    {
+                        id: 'lisa',
+                        name: 'Lisa',
+                        avatar: '👩',
+                        major: 'die Köchin',
+                        location: '',
+                        statement: 'Lisa sagt: „Ich war den ganzen Abend in der Küche und habe das Dessert vorbereitet. Um 21:45 Uhr habe ich Suppe gekocht, weil Herr Schneider sie später essen wollte. Ich habe niemanden gesehen.“',
+                        question: 'Warum war Lisa um 21:45 Uhr in der Küche',
+                        options: [
+                            { text: 'Sie hat die Bibliothek geputzt.',correct: false },
+                            { text: 'Sie hat Suppe gekocht.', correct: true },
+                            { text: 'Sie hat mit den Gästen gesprochen.', correct: false },
+                            { text: 'Sie hat geschlafen.', correct: false }
+                        ],
+                        explanation: 'Richtig! Lisa hat Suppe gekocht',
+                        clueText: '🔍 Ein anderer Kellner sagt: Lisa war um 21:45 Uhr wirklich in der Küche. Aber draußen vor dem Fenster hat jemand gestanden. (Alibi!)',
+                        innocent: true
+                    },
+                    {
+                        id: 'markus',
+                        name: 'Markus',
+                        avatar: '👨',
+                        major: 'der Gärtner',
+                        location: '',
+                        statement: 'Markus sagt: „Ich habe draußen im Garten gearbeitet, obwohl es dunkel war. Um 21:45 Uhr stand ich am Fenster der Bibliothek und habe gesehen, wie Herr Schneider ganz alleine an seinem Schreibtisch saß und Briefe schrieb.“',
+                        question: 'Wo war Markus laut seiner Aussage um 21:45 Uhr?',
+                        options: [
+                            { text: 'In der Küche.', correct: false },
+                            { text: 'Im Wohnzimmer.', correct: false },
+                            { text: 'Draußen am Fenster der Bibliothek.', correct: true },
+                            { text: 'Im Keller.', correct: false }
+                        ],
+                        explanation: 'Richtig! Markus stand draußen am Fenster der Bibliothek.',
+                        clueText: '🔍 Der Inspektor prüft das Fenster: Es war dunkel und die Vorhänge waren komplett zu. Man konnte von draußen gar nichts sehen.',
+                        innocent: false
+                    },
+                    {
+                        id: 'thomas',
+                        name: 'Thomas',
+                        avatar: '👨‍💼',
+                        major: 'der Geschäftspartner',
+                        location: '',
+                        statement: 'Thomas sagt: „Herr Schneider und ich hatten um 21:30 Uhr einen Streit wegen Geld. Aber ich habe das Haus um 21:40 Uhr verlassen und bin direkt nach Hause gefahren. Ich war um 21:45 Uhr nicht mehr im Haus.“',
+                        question: 'Worüber haben Herr Schneider und Thomas gestritten?',
+                        options: [
+                            { text: 'Über das Abendessen.', correct: false },
+                            { text: 'Über Geld.', correct: true },
+                            { text: 'Über den Garten.', correct: false },
+                            { text: 'Über ein Auto.', correct: false }
+                        ],
+                        explanation: 'Richtig! Sie haben über Geld gestritten.',
+                        clueText: '🔍 Ein Video von der Straße zeigt: Thomas’ Auto ist um 21:40 Uhr weggefahren. Er sagt die Wahrheit. (Alibi!)',
+                        innocent: true
+            },
+                  ],
             },
             {
                 id: 'case7',
                 number: 'Fall #7',
-                title: 'Stromausfall im Rechenzentrum',
-                location: 'SERVERRAUM',
+                title: 'Der Einbruch bei Familie Wagner',
+                location: 'Im Haus von Familie Wagne',
                 level: 'Niveau A2',
                 levelTag: 'level-a2',
-                desc: 'Listrik pusat server mendadak mati saat ujian coding daring sedang berlangsung.',
-                suspects: []
+                desc: 'Als Familie Wagner aus dem Theater nach Hause kommt, ist das Fenster kaputt und der Schmuck ist weg. Im Garten gibt es frische Spuren. Wer kennt den Zeitplan der Familie genau?',
+                story: '<p>Am Samstagabend ging Familie Wagner ins Theater. Als sie um 23:00 Uhr nach Hause kam, war das Wohnzimmerfenster kaputt und die Haustür stand offen. Das teure Bild und der Schmuck aus dem Schlafzimmer waren weg. Die Polizei kam sofort. Der Inspektor sah: Der Täter hat das Haus von innen ohne Schlüssel geöffnet. Auf dem nassen Gras im Garten gab es frische Schuhabdrücke. Der Inspektor sprach mit drei Personen aus der Nähe.</p>',
+              vocabList: [
+    { de: 'der Einbruch', id: 'Pembobolan/pencurian' },
+    { de: 'das Fenster', id: 'Jendela' },
+    { de: 'die Haustür', id: 'Pintu rumah' },
+    { de: 'der Schmuck', id: 'Perhiasan' },
+    { de: 'der Schuhabdruck', id: 'Jejak sepatu' },
+    { de: 'das Gras', id: 'Rumput' },
+    { de: 'der Schlüssel', id: 'Kunci' },
+    { de: 'das Schloss reparieren', id: 'Memperbaiki gembok/kunci pintu' },
+    { de: 'nass/dreckig', id: 'Basah/kotor' },
+    { de: 'der Räuber', id: 'Perampok' }
+],
+                suspects: [
+                    {
+                        id: 'herr weber',
+                        name: 'Herr Weber',
+                        avatar: '👨',
+                        major: 'der Nachbar',
+                        location: '',
+                        statement: 'Herr Weber sagt: „Ich habe im Wohnzimmer ferngesehen. Gegen 21:30 Uhr habe ich ein lautes Geräusch gehört. Ich bin sofort ans Fenster gegangen, aber ich habe niemanden gesehen, weil es draußen dunkel war.“',
+                        question: 'Was hat Herr Weber um 21:30 Uhr gemacht?',
+                        options: [
+                            { text: 'Er hat im Garten gearbeitet.',correct: false },
+                            { text: 'Er hat das Bild gestohlen.', correct: false },
+                            { text: 'Er hat ferngesehen.', correct: true },
+                            { text: 'Er ist ins Theater gegangen.', correct: false }
+                        ],
+                        explanation: 'Richtig! Herr Weber hat ferngesehen.',
+                        clueText: '🔍 Herr Weber zeigt dem Inspektor seine sauberen Hausschuhe. Er war den ganzen Abend im Haus. Die Spuren im Garten kommen von einer anderen Person. (Alibi!)',
+                        innocent: true
+                    },
+                    {
+                        id: 'frau schmidt',
+                        name: 'Frau Schmidt',
+                        avatar: '🧹',
+                        major: 'die Putzfraur',
+                        location: '',
+                        statement: 'Frau Schmidt sagt: „Ich putze das Haus immer am Freitag. Am Samstag war ich gar nicht hier, sondern bin mit meinem Hund im Park spazieren gegangen. Ich habe keinen Schlüssel für die Haustür',
+                        question: 'Wann putzt Frau Schmidt normalerweise das Haus?',
+                        options: [
+                            { text: 'Am Samstag.', correct: false },
+                            { text: 'Am Freitag.', correct: true },
+                            { text: 'Am Sonntag.', correct: false },
+                            { text: 'Jeden Abend.', correct: false }
+                        ],
+                        explanation: 'Richtig! Frau Schmidt putzt am Freitag.',
+                        clueText: '🔍 Weil Frau Schmidt keinen Schlüssel hat, konnte sie die Tür nicht von innen öffnen. Aber der Handwerker hat am Nachmittag an der Tür gearbeitet.',
+                        innocent: true
+                    },
+                    {
+                        id: 'jan',
+                        name: 'Jan ',
+                        avatar: '‍🔧',
+                        major: 'der Handwerker)',
+                        location: '',
+                        statement: 'Jan sagt: „Ich habe am Nachmittag das Schloss an der Gartentür repariert. Am Abend war ich zu Hause. Ich kenne Familie Wagner gut und weiß, dass sie jeden Samstagabend im Theater ist. Aber ich war am Abend nicht im Garten.“ Der Inspektor sieht jedoch, dass Jans Schuhe sehr nass und dreckig sind.', 
+                        question: 'Was weiß Jan über Familie Wagner?',
+                        options: [
+                            { text: 'Dass sie einen Hund hat.', correct: false },
+                            { text: 'Dass sie jeden Samstagabend im Theater ist.', correct: true },
+                            { text: 'Dass sie viel Geld im Keller hat.', correct: false },
+                            { text: 'Dass sie am Samstag putzt.', correct: false }
+                        ],
+                        explanation: 'Richtig! Jan weiß, dass Familie Wagner samstags im Theater ist.',
+                        clueText: '🔍 Jan sagt, er war am Abend zu Hause. Aber der nasse Schmutz an seinen Schuhen passt genau zu den frischen Schuhabdrücken im Garten. (Alibi!)',
+                        innocent: false
+            },
+                  ],
             },
             {
                 id: 'case8',
                 number: 'Fall #8',
-                title: 'Das verlorene Dokument',
-                location: 'RATHAUS BERLIN',
+                title: 'Der Mord im Museum',
+                location: 'Museum für Moderne Kuns',
                 level: 'Niveau A2',
                 levelTag: 'level-a2',
-                desc: 'Dokumen beasiswa internasional milik pelamar hilang dari meja pendaftaran.',
-                suspects: []
+                desc: 'Am Samstagabend wird Frau Berger tot in ihrem Büro im Museum gefunden. Auf ihrem Schreibtisch liegt ein altes Foto. Kurz vor ihrem Tod wollte sie wichtige Informationen über ein gestohlenes Bild geben. Drei Personen waren an diesem Abend im Museum.',
+                story: '<p>Am Samstagabend wird die Museumsleiterin Frau Berger tot in ihrem Büro gefunden. Auf ihrem Schreibtisch liegt ein altes Foto. Kurz vor ihrem Tod wollte sie der Polizei wichtige Informationen über ein gestohlenes Bild geben. Am Abend waren drei Personen im Museum: Lucy, David und Sophie. Die Polizei spricht mit allen drei.</p>',
+              vocabList: [
+    { de: 'das Museum', id: 'Museum' },
+    { de: 'das Büro', id: 'Kantor' },
+    { de: 'das Foto', id: 'Foto' },
+    { de: 'gestohlen', id: 'Dicuri' },
+    { de: 'die Bushaltestelle', id: 'Halte bus' },
+    { de: 'die Toilette', id: 'Toilet' },
+    { de: 'der Arbeitsplatz', id: 'Tempat kerja' },
+    { de: 'der Zettel', id: 'Catatan kecil' },
+    { de: 'bestätigen', id: 'Mengonfirmasi' },
+    { de: 'verantwortlich sein', id: 'Bertanggung jawab' }
+],
+                suspects: [
+                    {
+                        id: 'lucy',
+                        name: 'Lucy',
+                        avatar: '👩',
+                        major: 'die Studentin',
+                        location: '',
+                        statement: 'Lucy sagt: „Ich war um 19 Uhr im Museum, weil ich Frau Berger ein Buch bringen wollte. Wir haben kurz gesprochen. Danach bin ich nach draußen gegangen und habe auf meinen Bus gewartet. Um 19:20 Uhr bin ich mit dem Bus nach Hause gefahren. Danach bin ich nicht mehr zum Museum zurückgekommen.“',
+                        question: 'Was macht Lucy nach ihrem Gespräch mit Frau Berger?',
+                        options: [
+                            { text: 'Sie bleibt im Museum.',correct: false },
+                            { text: 'Sie wartet draußen auf den Bus.', correct: true },
+                            { text: 'Sie geht in Frau Bergers Büro.', correct: false },
+                            { text: 'Sie spricht mit Sophie.', correct: false }
+                        ],
+                        explanation: 'Richtig! Lucy geht nach draußen und wartet auf ihren Bus.',
+                        clueText: '🔍 Eine Kamera zeigt Lena um 19:20 Uhr an der Bushaltestelle. Lucy Alibi ist bestätigt (Alibi!)',
+                        innocent: true
+                    },
+                    {
+                        id: 'david',
+                        name: 'David',
+                        avatar: '👨',
+                        major: 'Museumsbitarbeiter',
+                        location: '',
+                        statement: 'David sagt: „Ich war den ganzen Abend im Museum und habe im zweiten Stock gearbeitet. Gegen 19:30 Uhr bin ich kurz auf die Toilette gegangen. Danach bin ich wieder an meinen Arbeitsplatz zurückgegangen. Ich habe Frau Berger an diesem Abend nicht getroffen.“',
+                        question: 'Was macht David nach seinem Besuch auf der Toilette?',
+                        options: [
+                            { text: 'Er geht nach Hause.', correct: false },
+                            { text: 'Er geht zu Frau Berger.', correct: false },
+                            { text: 'Er arbeitet wieder im zweiten Stock.', correct: true },
+                            { text: 'Er wartet vor dem Museum.', correct: false }
+                        ],
+                        explanation: 'Richtig! David geht nach der Toilette zurück an seinen Arbeitsplatz.',
+                        clueText: '🔍 Ein anderer Mitarbeiter sieht David um 19:35 Uhr wieder im zweiten Stock. David ist zu dieser Zeit nicht bei Frau Berger.',
+                        innocent: true
+                    },
+                    {
+                        id: 'sophie',
+                        name: 'Sophie',
+                        avatar: '👩',
+                        major: 'Kunststudentin',
+                        location: '',
+                        statement: 'Sophie sagt: „Ich war um 19 Uhr im Museum. Frau Berger wollte mit mir über das gestohlene Bild sprechen. Ich bin um 19:30 Uhr gegangen. Ich habe ihr Büro nicht betreten und das alte Foto nicht gesehen. Aber ich wusste schon, dass Frau Berger ein wichtiges Foto gefunden hatte.“',
+                        question: 'Welche Information kennt Sophie schon?',
+                        options: [
+                            { text: 'Frau Berger hat ein wichtiges Foto gefunden.', correct: true },
+                            { text: 'Frau Berger hat das gestohlene Bild verkauft.', correct: false },
+                            { text: 'Frau Berger hat das Museum geschlossen.', correct: false },
+                            { text: 'Frau Berger hat einen neuen Job gefunden.', correct: false }
+                        ],
+                        explanation: 'Richtig! Sophie weiß schon von dem wichtigen Foto.',
+                        clueText: '🔍 Auf Frau Bergers Schreibtisch findet die Polizei einen Zettel: „Sophie weiß etwas über das Foto.“ (Alibi!)',
+                        innocent: false
+            },
+                  ],
             },
             {
                 id: 'case9',
                 number: 'Fall #9',
-                title: 'Sabotage auf dem Sportplatz',
-                location: 'STADION',
+                title: 'Der Mord in Ferienhaus',
+                location: 'Ferienhaus am See',
                 level: 'Niveau A2',
                 levelTag: 'level-a2',
-                desc: 'Peralatan latihan tim sepak bola kampus dirusak menjelang turnamen antar kota.',
-                suspects: []
+                desc: 'Am Sonntagmorgen wird Herr Keller tot in einem Ferienhaus gefunden. In der Nacht hat es stark geregnet. Neben dem Haus findet die Polizei einen nassen Schuhabdruck. Drei Personen waren am Abend bei Herrn Keller.',
+                story: '<p>Am Sonntagmorgen wird Herr Keller tot in einem Ferienhaus gefunden. In der Nacht hat es stark geregnet. Neben dem Haus findet die Polizei einen nassen Schuhabdruck. Am Abend waren drei Personen bei Herrn Keller: Olivia, Eric und Adam. Die Polizei fragt alle drei, was sie in der Nacht gemacht haben.</p>',
+              vocabList: [
+    { de: 'das Ferienhaus', id: 'Rumah liburan' },
+    { de: 'regnen', id: 'Hujan' },
+    { de: 'der Schuhabdruck', id: 'Jejak sepatu' },
+    { de: 'nass', id: 'Basah' },
+    { de: 'trocken', id: 'Kering' },
+    { de: 'Musik hören', id: 'Mendengarkan musik' },
+    { de: 'der Nachbar', id: 'Tetangga' },
+    { de: 'der Spaziergang', id: 'Jalan-jalan santai' },
+    { de: 'bestätigen', id: 'Mengonfirmasi' },
+    { de: 'widersprechen', id: 'Bertentangan/kontradiksi' }
+],
+                suspects: [
+                    {
+                        id: 'olivia',
+                        name: 'Olivia',
+                        avatar: '👩',
+                        major: 'Freundin von Herrn Keller',
+                        location: '',
+                        statement: 'Olivia sagt: „Ich war um 20 Uhr bei Herrn Keller. Wir haben zusammen gegessen. Danach bin ich um 21 Uhr in mein Zimmer gegangen. Ich habe die ganze Nacht dort geschlafen und bin nicht mehr nach draußen gegangen. Am nächsten Morgen waren meine Schuhe noch trocken.“',
+                        question: 'Welche Information spricht gegen einen Spaziergang von Olivia?',                       
+                        options: [
+                            { text: 'Sie hat mit Herrn Keller gegessen.',correct: false },
+                            { text: 'Sie ist um 21 Uhr in ihr Zimmer gegangen.', correct: false },
+                            { text: 'Ihre Schuhe waren am nächsten Morgen trocken.', correct: true },
+                            { text: 'Sie war um 20 Uhr bei Herrn Keller.', correct: false }
+                        ],
+                        explanation: 'Richtig! Trockene Schuhe sprechen dafür, dass Olivia nicht durch den nassen Garten gegangen ist.',
+                        clueText: '🔍 Am nächsten Morgen sind Annas Schuhe sauber und trocken. Es gibt keine Spuren von draußen. (Alibi!)',
+                        innocent: true
+                    },
+                    {
+                        id: 'eric',
+                        name: 'Eric',
+                        avatar: '👨',
+                        major: 'der Nachbar',
+                        location: '',
+                        statement: 'Eric sagt: „Ich war am Abend draußen, weil ich einen Spaziergang machen wollte. Danach bin ich wieder ins Haus gegangen. Um 21:30 Uhr war ich in meinem Zimmer und habe Musik gehört. Ein Nachbar hat die Musik auch gehört.“',
+                        question: 'Was kann ein Nachbar über Eric’ Abend bestätigen?',
+                        options: [
+                            { text: 'Eric hat mit Herrn Keller gegessen.', correct: false },
+                            { text: 'Eric war um 21:30 Uhr in seinem Zimmer.', correct: true },
+                            { text: 'Eric ist um 20 Uhr spazieren gegangen.', correct: false },
+                            { text: 'Eric ist am nächsten Morgen nach Hause gefahren.', correct: false }
+                        ],
+                        explanation: 'Richtig! Der Nachbar hat um 21:30 Uhr Musik aus Eric Zimmer gehört.',
+                        clueText: '🔍 Der Nachbar bestätigt die Musik um 21:30 Uhr. Eric hat für diese Zeit also ein Alibi.',
+                        innocent: true
+                    },
+                    {
+                        id: 'adam',
+                        name: 'Adam',
+                        avatar: '👨‍💼',
+                        major: 'Freund von Herrn Keller',
+                        location: '',
+                        statement: 'Adam sagt: „Ich war den ganzen Abend im Haus. Nach dem Essen habe ich mit Herrn Keller gesprochen. Danach bin ich in mein Zimmer gegangen. Ich war nicht draußen. Meine Schuhe standen die ganze Nacht in meinem Zimmer.“',
+                        question: 'Welche Information passt nicht zu Adam Aussage?',
+                        options: [
+                            { text: 'Er hat nach dem Essen mit Herrn Keller gesprochen.', correct: false },
+                            { text: 'Er ist nach dem Essen in sein Zimmer gegangen.', correct: false },
+                            { text: 'Er war den ganzen Abend im Haus.', correct: false },
+                            { text: 'Seine Schuhe sind nass, obwohl sie im Zimmer standen.', correct: true }
+                        ],
+                        explanation: 'Richtig! Adam sagt, dass seine Schuhe die ganze Nacht im Zimmer waren.',
+                        clueText: '🔍 Die Polizei findet neben dem Haus einen nassen Schuhabdruck. Die Größe passt zu Adam Schuhen. Außerdem sind Adam Schuhe noch nass.',
+                        innocent: false
+            },
+                  ],
             },
             {
                 id: 'case10',
                 number: 'Fall #10',
-                title: 'Der Ausfall im Rundfunkstudio',
-                location: 'CAMPUS RADIO',
+                title: 'Der vergiftete Saft',
+                location: 'In der Küche und im Klassenraum der Klasse 2A',
                 level: 'Niveau A2',
                 levelTag: 'level-a2',
-                desc: 'Siaran radio live kampus mendadak terputus karena mikrofon utama dicabut.',
-                suspects: []
+                desc: 'Die Klasse 2A macht eine kleine Party. Alle essen Pizza und trinken Saft. Doch nach dem Essen fühlt sich Frau Klein plötzlich schlecht. Jemand hat den Saft vergiftet. Wer ist der Täter?',
+                story: '<p>Am Freitagabend macht die Klasse 2A eine kleine Party in der Schule. Die Schüler essen Pizza und trinken Saft. Nach dem Essen fühlt sich die Lehrerin Frau Klein plötzlich schlecht. Sie hat starke Bauchschmerzen. Vor der Party waren drei Schüler in der Küche: Emma, Jonas und Paul. Die Polizei fragt alle drei Schüler.</p>',
+              vocabList: [
+    { de: 'die Party', id: 'Pesta' },
+    { de: 'die Pizza', id: 'Pizza' },
+    { de: 'der Saft', id: 'Jus' },
+    { de: 'die Bauchschmerzen', id: 'Sakit perut' },
+    { de: 'das Glas', id: 'Gelas' },
+    { de: 'die Flasche', id: 'Botol' },
+    { de: 'die Musik anmachen', id: 'Menyalakan musik' },
+    { de: 'ungewöhnlich', id: 'Tidak biasa/aneh' },
+    { de: 'der Täter', id: 'Pelaku' },
+    { de: 'zurückgehen', id: 'Kembali' }
+],
+                suspects: [
+                    {
+                        id: 'emma',
+                        name: 'Emma',
+                        avatar: '👩',
+                        major: 'die Schülerin',
+                        location: '',
+                        statement: 'Emma sagt: „Ich war in der Küche, weil ich die Gläser auf den Tisch stellen wollte. Danach habe ich die Musik im Klassenraum angemacht. Ich habe keinen Saft getrunken.“',
+                        question: 'Was macht Emma nach ihrem Besuch in der Küche?',
+                        options: [
+                            { text: 'Sie isst Pizza.',correct: false },
+                            { text: 'Sie macht die Musik an.', correct: true },
+                            { text: 'Sie trinkt Saft.', correct: false },
+                            { text: 'Sie geht nach Hause.', correct: false }
+                        ],
+                        explanation: 'Richtig! Emma macht nach ihrem Besuch in der Küche die Musik an.',
+                        clueText: '🔍 Emma stellt nur die Gläser auf den Tisch. Danach geht sie direkt zurück in den Klassenraum. Sie hat keinen Saft getrunken. (Alibi!)',
+                        innocent: true
+                    },
+                    {                    
+                       id: 'jonas',
+                        name: 'Jonas',
+                        avatar: '👨',
+                        major: 'der Partyhelfer',
+                        location: '',
+                        statement: 'Jonas sagt: „Ich habe in der Küche die Pizza auf die Teller gelegt. Danach habe ich zwei Flaschen Saft auf den Tisch gestellt. Dann bin ich wieder zu den anderen gegangen”.',
+                        question: 'Was stellt Jonas auf den Tisch?',
+                        options: [
+                            { text: 'Zwei Flaschen Saft.', correct: true },
+                            { text: 'Drei Gläser Wasser.', correct: false },
+                            { text: 'Zwei Teller Pizza.', correct: false },
+                            { text: 'Eine Flasche Milch.', correct: false }
+                        ],
+                        explanation: 'Richtig! Jonas stellt zwei Flaschen Saft auf den Tisch.',
+                        clueText: '🔍 Jonas ist der Einzige, der die Saftflaschen in der Küche nimmt und auf den Tisch stellt. Die Polizei findet später etwas Ungewöhnliches in einer Saftflasche. ',
+                        innocent: false
+                    },
+                    {
+                        id: 'paul',
+                        name: 'Paul',
+                        avatar: '👨‍💼',
+                        major: 'der Schüler',
+                        location: '',
+                        statement: 'Paul sagt: „Ich war nur kurz in der Küche. Ich habe meine Jacke dort gelassen. Danach habe ich sie geholt und bin wieder in den Klassenraum gegangen. Ich habe nur Wasser getrunken.“',
+                        question: 'Was hat Paul in der Küche?',
+                        options: [
+                            { text: 'Seine Tasche.', correct: false },
+                            { text: 'Sein Handy.', correct: false },
+                            { text: 'Seine Jacke.', correct: true },
+                            { text: 'Sein Buch.', correct: false }
+                        ],
+                        explanation: 'Richtig! Paul hat seine Jacke in der Küche.',
+                        clueText: '🔍 Paul geht in die Küche, um seine Jacke zu holen. Er trinkt nur Wasser und nimmt keine Saftflasche. (Alibi!)',
+                        innocent: true
+            },
+                  ],
             }
         ];
 
@@ -1234,36 +1846,45 @@ function goBackFromStory() {
 
         // --- VIEW SWITCHER (SPA CONTROL) ---
         function switchView(viewName) {
-            playSound('click');
-            gameState.currentView = viewName;
+    playSound('click');
+    gameState.currentView = viewName;
 
-            const homeView = document.getElementById('viewHome');
-            const caseSelectView = document.getElementById('viewCaseSelect');
-            const gameplayView = document.getElementById('viewGameplay');
-            const navBackBtn = document.getElementById('navBackBtn');
-            const clueStatPill = document.getElementById('clueStatPill');
-            const subtitleHeader = document.getElementById('activeCaseHeaderSubtitle');
+    const homeView = document.getElementById('viewHome');
+    const caseSelectView = document.getElementById('viewCaseSelect');
+    const gameplayView = document.getElementById('viewGameplay');
+    const storyView = document.getElementById('viewStory'); // <-- Tambahkan viewStory
+    
+    const navBackBtn = document.getElementById('navBackBtn');
+    const clueStatPill = document.getElementById('clueStatPill');
+    const subtitleHeader = document.getElementById('activeCaseHeaderSubtitle');
 
-            homeView.classList.add('hidden');
-            caseSelectView.classList.add('hidden');
-            gameplayView.classList.add('hidden');
-            navBackBtn.classList.add('hidden');
-            clueStatPill.style.display = 'none';
+    // 1. Sembunyikan SEMUA view dulu menggunakan class 'hidden'
+    if (homeView) homeView.classList.add('hidden');
+    if (caseSelectView) caseSelectView.classList.add('hidden');
+    if (gameplayView) gameplayView.classList.add('hidden');
+    if (storyView) storyView.classList.add('hidden'); // <-- Sembunyikan story view
+    
+    if (navBackBtn) navBackBtn.classList.add('hidden');
+    if (clueStatPill) clueStatPill.style.display = 'none';
 
-            if (viewName === 'home') {
-                homeView.classList.remove('hidden');
-                if (subtitleHeader) subtitleHeader.textContent = "Deutsch Lernen durch Detektivarbeit";
-            } else if (viewName === 'case_select') {
-                caseSelectView.classList.remove('hidden');
-                renderCaseGrid();
-                if (subtitleHeader) subtitleHeader.textContent = "Wähle einen Fall (10 Fälle)";
-            } else if (viewName === 'gameplay') {
-                gameplayView.classList.remove('hidden');
-                navBackBtn.classList.remove('hidden');
-                clueStatPill.style.display = 'flex';
-                renderCurrentStep();
-            }
-        }
+    // 2. Tampilkan view yang sesuai
+    if (viewName === 'home') {
+        if (homeView) homeView.classList.remove('hidden');
+        if (subtitleHeader) subtitleHeader.textContent = "Deutsch Lernen durch Detektivarbeit";
+    } else if (viewName === 'case_select') {
+        if (caseSelectView) caseSelectView.classList.remove('hidden');
+        renderCaseGrid();
+        if (subtitleHeader) subtitleHeader.textContent = "Wähle einen Fall (10 Fälle)";
+    } else if (viewName === 'story') {
+        if (storyView) storyView.classList.remove('hidden'); // <-- Tampilkan story view saja
+        if (navBackBtn) navBackBtn.classList.remove('hidden');
+    } else if (viewName === 'gameplay') {
+        if (gameplayView) gameplayView.classList.remove('hidden');
+        if (navBackBtn) navBackBtn.classList.remove('hidden');
+        if (clueStatPill) clueStatPill.style.display = 'flex';
+        renderCurrentStep();
+    }
+}
 
         // --- RENDER 10 CASES GRID ---
         function renderCaseGrid() {
@@ -1294,28 +1915,33 @@ function goBackFromStory() {
 
         // --- SELECT A CASE ---
         function selectCase(caseId) {
-            const selected = casesDatabase.find(c => c.id === caseId);
-            if (!selected) return;
+    const selected = casesDatabase.find(c => c.id === caseId);
+    if (!selected) return;
 
-            gameState.activeCaseId = caseId;
-            gameState.currentStep = 0;
-            gameState.solvedSuspects = [];
-            gameState.unlockedClues = [];
+    gameState.activeCaseId = caseId;
+    gameState.currentStep = 0;
+    gameState.solvedSuspects = [];
+    gameState.unlockedClues = [];
+    
+    // Reset status gameplay agar pemain mulai dari awal cerita
+    hasStartedGameplay = false; 
 
-            const subtitleHeader = document.getElementById('activeCaseHeaderSubtitle');
-            if (subtitleHeader) subtitleHeader.textContent = `${selected.number}: ${selected.title}`;
+    const subtitleHeader = document.getElementById('activeCaseHeaderSubtitle');
+    if (subtitleHeader) subtitleHeader.textContent = `${selected.number}: ${selected.title}`;
 
-            const locTag = document.getElementById('sidebarLocationTag');
-            if (locTag) locTag.textContent = selected.location;
+    const locTag = document.getElementById('sidebarLocationTag');
+    if (locTag) locTag.textContent = selected.location;
 
-            updateNotebook();
-            switchView('gameplay');
-        }
+    updateNotebook();
+    
+    // GANTI switchView('gameplay') MENJADI openStoryView():
+    openStoryView();
+}
 
         // --- GET ACTIVE CASE OBJECT ---
         function getActiveCase() {
-            return casesDatabase.find(c => c.id === gameState.activeCaseId) || casesDatabase[0];
-        }
+    return casesDatabase.find(c => c.id === gameState.activeCaseId);
+}
 
         // --- RENDER SIDEBAR SUSPECT CARDS ---
         function renderSuspectSidebar() {
@@ -1666,37 +2292,44 @@ windowEl.innerHTML = `
                 // SUCCESS
                 playSound('victory');
                 gameState.score += 50;
-                const scoreEl = document.getElementById('scoreText');
+                const scoreEl = document.getElementById('scoreDisplay');
                 if (scoreEl) scoreEl.textContent = `${gameState.score} Pkt`;
 
-                const vocabHtml = currentCase.vocabList ? `
-                    <div style="background: rgba(15,23,42,0.9); border: 1px solid var(--border-color); border-radius: 12px; padding: 0.85rem; width: 100%; max-width: 480px; text-align: left; margin-top: 0.25rem;">
-                        <div style="color: var(--amber-accent); font-weight: 700; font-size: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.3rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem;">
-                            <span>📖 WORTSCHATZ RECAP (${currentCase.number}):</span>
-                        </div>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.4rem; max-height: 120px; overflow-y: auto; padding-right: 0.2rem;">
-                            ${currentCase.vocabList.map(v => `
-                                <div style="font-size: 0.7rem; background: rgba(30,41,59,0.6); padding: 0.3rem 0.5rem; border-radius: 6px; display: flex; justify-content: space-between;">
-                                    <strong style="color: #f8fafc;">${v.de}</strong>
-                                    <span style="color: var(--text-muted);">${v.id}</span>
+                // 1. Ambil data kasus yang sedang aktif
+                const currentCase = getActiveCase();
+                const solutionText = (currentCase && currentCase.solution) 
+                    ? currentCase.solution 
+                    : (chosen ? `${chosen.name} berbohong tentang alibinya!` : 'Alibi pelaku tidak cocok.');
+
+                // 2. Olah Wortschatz secara aman
+                let vocabHtml = '';
+                if (currentCase && currentCase.vocabList && currentCase.vocabList.length > 0) {
+                    vocabHtml = `
+                        <div style="background: rgba(15,23,42,0.6); border: 1px solid var(--border-color); border-radius: 12px; padding: 0.75rem; text-align: left; max-width: 480px;">
+                            <div style="font-size: 0.7rem; color: var(--amber-accent); font-weight: 700; margin-bottom: 0.4rem;">📖 Wortschatz</div>
+                            ${currentCase.vocabList.map(item => `
+                                <div class="vocab-item">
+                                    <span class="vocab-de">${item.de}</span>
+                                    <span class="vocab-id">${item.id}</span>
                                 </div>
                             `).join('')}
                         </div>
-                    </div>
-                ` : '';
+                    `;
+                }
 
+                // 3. Render Modal Kemenangan
                 windowEl.innerHTML = `
                     <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.85rem; flex: 1; padding: 0.5rem 0;">
                         <div style="font-size: 3rem; background: rgba(16,185,129,0.2); border: 2px solid var(--emerald-green); border-radius: 20px; width: 75px; height: 75px; display: flex; align-items: center; justify-content: center;">
-                            ${chosen.avatar}
+                            ${chosen ? chosen.avatar : '🎉'}
                         </div>
 
                         <div>
                             <h2 style="font-size: 1.4rem; font-weight: 800; color: #34d399;">
-                                RICHTIG! ${chosen.name.toUpperCase()} IST DER TÄTER! 🎉
+                                RICHTIG! ${chosen ? chosen.name.toUpperCase() : 'TÄTER'} IST DER TÄTER! 🎉
                             </h2>
                             <p style="font-size: 0.8rem; color: #e2e8f0; max-width: 480px; margin-top: 0.3rem; line-height: 1.4;">
-                                <strong style="color: var(--amber-accent);">Alibi-Bruch:</strong> Lukas mengaku makan pizza di Mensa pukul 10:00 Uhr. Padahal kata koki Mensa baru buka pukul 11:30 Uhr! Lukas berbohong!
+                                <strong style="color: var(--amber-accent);">Alibi-Bruch:</strong> ${solutionText}
                             </p>
                         </div>
 
@@ -1707,17 +2340,17 @@ windowEl.innerHTML = `
                             </div>
                             <div>
                                 <div style="font-size: 0.65rem; color: var(--text-muted);">Hinweise</div>
-                                <div style="font-size: 1.1rem; font-weight: 800; color: #34d399;">${gameState.unlockedClues.length} / ${suspects.length}</div>
+                                <div style="font-size: 1.1rem; font-weight: 800; color: #34d399;">${gameState.unlockedClues.length} /${suspects.length}</div>
                             </div>
                         </div>
 
                         ${vocabHtml}
 
-                        <div style="display:flex; gap:0.75rem; margin-top: 0.25rem;">
-    <button onclick="switchView('case_select')" class="btn btn-amber" style="color: #ffffff; padding: 0.65rem 1.25rem;">
-        📋 Weitere Fälle (Pilih Kasus Lain)
-    </button>
-</div>
+                        <div style="display:flex; gap:0.75rem; margin-top:0.5rem;">
+                            <button onclick="switchView('case_select')" class="btn btn-amber" style="color: #ffffff;">
+                                ← Weitere Fälle (Pilih Kasus Lain)
+                            </button>
+                        </div>
                     </div>
                 `;
             } else {
